@@ -1,29 +1,17 @@
 ---
-- name: create backup directory if not exist
+- name: Create backup directory if not exist
   file:
     path: /home/oracle/backup
     state: directory
 
-- name: create backup of OUD ldap instance
+- name: Create backup of OUD ldap instance
   archive:
     path: /app/ldap_instance
-    dest: /home/oracle/backup/ldap_instance_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    dest: /home/oracle/backup/ldap_instance_{{ ansible_date_time.date }}_full_backup.tar.gz
     format: gz
 
-- name: create backup of OUD fmwOUD12214
+- name: Create backup of OUD oracle home - {{ oracle_home_oud }}
   archive:
-    path: /app/fmwOUD12214
-    dest: /home/oracle/backup/fmwOUD12214_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    path: "{{ oracle_home_oud }}"
+    dest: /home/oracle/backup/fmwOUD12214_{{ ansible_date_time.date }}_full_backup.tar.gz
     format: gz
-
-# - name: export ldif
-#   shell: '/app/fmwOUD12214/oud/bin/export-ldif -h localhost -p 4444 -D "cn=Directory Manager" -j /app/security/OUD/pwd.txt -X --includeBranch "dc=ccn2,dc=eu" --backendID userRoot --ldifFile full_export.ldif'
-#   register: export
-
-# - debug:
-#     var: export.stdout_lines
-
-# - name: copy export to backup directory
-#   copy:
-#     src: /app/ldap_instance/OUD/full_export.ldif
-#     dest: /home/oracle/backup/full_export_{{ ansible_date_time.date }}.ldif

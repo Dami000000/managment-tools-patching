@@ -1,12 +1,11 @@
 ---
-
-- name: Check OUD status 
+- name: Check OUD status
   command: "/app/ldap_instance/OUD/bin/status --no-prompt --script-friendly"
   register: ldap_instance_status
   changed_when: false
 
-- name: Shutdown OUD Instance 
-  shell: 
+- name: Shutdown OUD Instance
+  shell:
     cmd: "/app/ldap_instance/OUD/bin/stop-ds"
   when: "'Server Run Status: Started' in ldap_instance_status.stdout"
   register: stopoud_out

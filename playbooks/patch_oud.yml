@@ -9,7 +9,6 @@
 #   Patch specific location:
 #     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "target=oud_ap1"
 #     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "target=oud_ap2"
-#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "target=oud_mh"
 #
 #   Patch specific server:
 #     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "target=oud1.ap1.dev.ccn2.taxud"
@@ -17,15 +16,15 @@
 #   Patch on FAT environment:
 #     ansible-playbook -i inventory/fat/hosts playbooks/patch_oud.yml -e "target=oud_ap1"
 #
-#   Override serial (default: 2 hosts at a time):
-#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "serial=1"
+#   Override serial (default: 1 host at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "serial=2"
 #
-# Default: runs on ALL OUD hosts (ap1 + ap2 + mh), 2 hosts at a time
+# Default: runs on ALL OUD hosts, 1 host at a time
 # ============================================================
 
 - name: OUD Patching
   hosts: "{{ target | default('oud') }}"
-  serial: "{{ serial | default(2) }}"
+  serial: "{{ serial | default(1) }}"
   become: yes
   become_user: "{{ oracle_user }}"
 
@@ -47,7 +46,7 @@
       tags: [opatch]
 
     - name: Apply OUD patches
-      include_tasks: ../roles/patch/oud_patch_install/tasks/oud_patch_install.yml
+      include_tasks: ../roles/patch/oud_patch_install/tasks/oud_install.yml
       tags: [patch]
 
     - name: Start OUD services

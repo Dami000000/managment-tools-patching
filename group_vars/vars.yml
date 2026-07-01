@@ -106,7 +106,7 @@ oam_patches_id:
 # OIG specific variables
 # oracle_home_oig = /app/fmwOIM12214 (OIG uses OIM binaries path)
 # ============================================================
-oig_admin_server_url: "t3://oig-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
+oig_admin_server_url: "t3://oim-mh-intvip.bck.{{ env }}.ccn2.taxud"
 oig_admin_server_port: 7101
 oig_managed_server_port: 14000
 oig_soa_port: 8001
@@ -167,6 +167,32 @@ ohs_patches_id:
   - patch_id: 37056593
   - patch_id: 37202255
   - patch_id: 36789759
+
+# ============================================================
+# OUD specific variables
+# ============================================================
+oud_ldap_instance: /app/ldap_instance
+
+# OUD patch archives
+oud_patches_to_apply:
+  - patch_archive: p32720458_122140_Generic.zip
+  - patch_archive: p33093748_122140_Generic.zip
+  - patch_archive: p34801809_122140_Generic.zip
+  - patch_archive: p34454476_121020_Linux-x86-64.zip
+  - patch_archive: p34879707_122140_Generic.zip
+  - patch_archive: p34883826_122140_Generic.zip
+  - patch_archive: p34682234_122140_Generic.zip
+  - patch_archive: p34964109_12214221009_Generic.zip
+
+oud_patches_id:
+  - patch_id: 32720458
+  - patch_id: 33093748
+  - patch_id: 34801809
+  - patch_id: 34454476
+  - patch_id: 34879707
+  - patch_id: 34883826
+  - patch_id: 34682234
+  - patch_id: 34964109
 
 # ============================================================
 # OSB specific variables

@@ -1,4 +1,2 @@
 ---
-- include_tasks: roles/stop_cots/tasks/stop_oud.yml
-- include_tasks: oud_install.yml
-- include_tasks: roles/start_cots/tasks/start_oud.yml
+- import_tasks: oud_install.yml
