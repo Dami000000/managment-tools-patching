@@ -1,0 +1,58 @@
+---
+# ============================================================
+# OAM Patch Playbook
+# ============================================================
+# Usage:
+#   Patch all OAM hosts (default):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oam.yml
+#
+#   Patch specific location:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oam.yml -e "target=oam_ap1"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oam.yml -e "target=oam_ap2"
+#
+#   Patch specific server:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oam.yml -e "target=oam1.ap1.dev.ccn2.taxud"
+#
+#   Patch on FAT environment:
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_oam.yml -e "target=oam_ap1"
+#
+#   Override serial (default: 2 hosts at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oam.yml -e "serial=1"
+#
+# Default: runs on ALL OAM hosts (ap1 + ap2), 2 hosts at a time
+# ============================================================
+
+- name: OAM Patching
+  hosts: "{{ target | default('oam') }}"
+  serial: "{{ serial | default(2) }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+
+  tasks:
+    - name: Stop OAM services
+      include_tasks: ../roles/stop_cots/stop_oam/tasks/stop_oam.yml
+      tags: [stop, cots]
+
+    - name: Backup OAM
+      include_tasks: ../roles/backup/backup_oam/tasks/backup_oam.yml
+      tags: [backup]
+
+    - name: Install/Update JDK
+      include_tasks: ../roles/jdk/tasks/jdk_install.yml
+      tags: [jdk]
+
+    - name: Install/Update OPatch for OAM
+      include_tasks: ../roles/opatch_install/tasks/opatch_install_oam.yml
+      tags: [opatch]
+
+    - name: Apply SPBAT OAM Bundle Patch
+      include_tasks: ../roles/spbat/tasks/spbat_oam_install.yml
+      tags: [spbat]
+
+    - name: Apply OAM patches
+      include_tasks: ../roles/patch/oam_patch_install/tasks/oam_install.yml
+      tags: [patch]
+
+    - name: Start OAM services
+      include_tasks: ../roles/start_cots/start_oam/tasks/start_oam.yml
+      tags: [start, cots]

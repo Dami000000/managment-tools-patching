@@ -17,6 +17,9 @@
 #   Patch on FAT environment:
 #     ansible-playbook -i inventory/fat/hosts playbooks/patch_oud.yml -e "target=oud_ap1"
 #
+#   Override serial (default: 2 hosts at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oud.yml -e "serial=1"
+#
 # Default: runs on ALL OUD hosts (ap1 + ap2 + mh), 2 hosts at a time
 # ============================================================
 
@@ -26,24 +29,27 @@
   become: yes
   become_user: "{{ oracle_user }}"
 
-  vars:
-    patch_source_dir: "{{ patches_dir_oud }}"
-
-  roles:
-    - role: stop_cots
+  tasks:
+    - name: Stop OUD services
+      include_tasks: ../roles/stop_cots/stop_oud/tasks/stop_oud.yml
       tags: [stop, cots]
 
-    - role: backup/backup_oud
+    - name: Backup OUD
+      include_tasks: ../roles/backup/backup_oud/tasks/backup_oud.yml
       tags: [backup]
 
-    - role: jdk
+    - name: Install/Update JDK
+      include_tasks: ../roles/jdk/tasks/jdk_install.yml
       tags: [jdk]
 
-    - role: opatch_install
+    - name: Install/Update OPatch for OUD
+      include_tasks: ../roles/opatch_install/tasks/opatch_install_oud.yml
       tags: [opatch]
 
-    - role: patch/oud_patch_install
+    - name: Apply OUD patches
+      include_tasks: ../roles/patch/oud_patch_install/tasks/oud_patch_install.yml
       tags: [patch]
 
-    - role: start_cots
+    - name: Start OUD services
+      include_tasks: ../roles/start_cots/start_oud/tasks/start_oud.yml
       tags: [start, cots]
