@@ -30,11 +30,11 @@
 
   tasks:
     - name: Stop OIG services
-      include_tasks: ../roles/stop_cots/stop_oim/tasks/stop_oim.yml
+      include_tasks: ../roles/stop_cots/stop_oig/tasks/stop_oig.yml
       tags: [stop, cots]
 
     - name: Backup OIG
-      include_tasks: ../roles/backup/backup_oim/tasks/backup_oim.yml
+      include_tasks: ../roles/backup/backup_oig/tasks/backup_oig.yml
       tags: [backup]
 
     - name: Install/Update JDK
@@ -54,5 +54,5 @@
       tags: [patch]
 
     - name: Start OIG services
-      include_tasks: ../roles/start_cots/start_oim/tasks/start_oim.yml
+      include_tasks: ../roles/start_cots/start_oig/tasks/start_oig.yml
       tags: [start, cots]
