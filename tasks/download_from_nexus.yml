@@ -1,0 +1,9 @@
+---
+- name: Download files from Nexus repository
+  get_url:
+    url: "{{ nexus_url }}/repository/{{ nexus_repository }}/{{ item.filename }}"
+    dest: "{{ destination }}"
+    headers:
+      Authorization: "Basic {{ (nexus_username + ':' + nexus_password) | b64encode }}"
+  with_items: "{{ files_to_download }}"
+  delegate_to: localhost

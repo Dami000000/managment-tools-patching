@@ -1,0 +1,4 @@
+---
+- include_tasks: ../roles/stop_cots/stop_ohs/tasks/stop_ohs.yml
+- include_tasks: backup_ohs.yml
+- include_tasks: ../roles/start_cots/start_ohs/tasks/start_ohs.yml

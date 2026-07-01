@@ -1,0 +1,72 @@
+---
+- name: Shutdown OAM Managed Server - node1
+  shell: 
+    cmd: "nohup ./stoptManagedWebLogic.sh wls_oam1 {{ oam_admin_url_ap1 }} &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: stopManagedServers_out
+- debug: 
+     var: stopManagedServers_out.stdout_lines
+
+- name: Shutdown OAM Managed Server - node2
+  shell: 
+    cmd: "nohup ./stoptManagedWebLogic.sh wls_oam2 {{ oam_admin_url_ap1 }} &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: stopManagedServers2_out
+- debug: 
+    var: stopManagedServers_out2.stdout_lines
+
+- name: Shutdown OAM Admin Servers
+  shell:
+    cmd: "nohup ./stopWebLogic.sh &"
+    chdir: "/mnt/nfs/config/aserver/domains/IAMAccessDomain/bin"
+  register: stopAdminServer_out
+- debug: 
+     var: stopAdminServer_out.stdout_lines
+
+- name: Shutdown OAM NodeManager
+  shell:
+    cmd: "nohup ./stopNodeManager.sh &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: stopNodeManager_out
+- debug: 
+    var: stopNodeManager_out.stdout_lines
+
+
+- name: "Rollback patch"
+  shell: "{{ opatch_home_oam }}/opatch rollback -id {{ patch_id }} -silent"
+  register: opatch_rollback_out
+
+- debug:
+    var: opatch_rollback_out.results
+
+- name: Start OAM NodeManager
+  shell:
+    cmd: "nohup ./startNodeManager.sh &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: startNodeManager_out
+- debug: 
+     var: startNodeManager_out.stdout_lines 
+
+- name: Start OAM Admin Server
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh {{ managed_server_name }} {{ oam_admin_url_ap1 }} &"
+    chdir: "/mnt/nfs/config/aserver/domains/IAMAccessDomain/bin"
+  register: startOAMAdminServer_out
+- debug: 
+    var: startOAMAdminServer_out.stdout_lines 
+  
+- name: Start OAM Managed Servers - node 1
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh  wls_oam1 {{ oam_admin_url_ap1 }} &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: startMenagedServer_out
+- debug: 
+    var: startMenagedServer_out.stdout_lines 
+  
+- name: Start OAM Managed Servers -node 2
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh  wls_oam2 {{ oam_admin_url_ap1 }} &"
+    chdir: "/app/config/mserver/domains/IAMAccessDomain/bin"
+  register: startMenagedServer2_out
+- debug: 
+    var: startMenagedServer2_out.stdout_lines

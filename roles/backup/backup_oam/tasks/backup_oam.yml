@@ -1,0 +1,25 @@
+---
+- name: create backup directory if not exist
+  file:
+    path: /home/oracle/backup
+    state: directory
+
+- name: create backup of OAM Managed Server configuration files - /app/config
+  archive:
+    path: /app/config
+    dest: /home/oracle/backup/OAM_config_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+
+- name: create backup of OAM MAnaged serverbinaries /app/fmwOAM12214
+  archive:
+    path: /app/fmwOAM12214
+    dest: /home/oracle/backup/fmwOAM12214_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+
+- name: create backup of OAM Admin Server configuration files - /mnt/nfs/config
+  archive:
+    path: /mnt/nfs/config
+    dest: /home/oracle/backup/Admin_OAM_config_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+  when: 
+    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'

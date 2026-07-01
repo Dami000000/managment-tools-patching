@@ -1,0 +1,21 @@
+---
+
+- name: export ldif
+  shell: '/app/fmwOUD12214/oud/bin/export-ldif -h localhost -p 4444 -D "cn=Directory Manager" -j /app/security/OUD/pwd.txt -X --includeBranch "dc=ccn2,dc=eu" --backendID userRoot --ldifFile full_export.ldif'
+  environment:
+    JAVA_HOME: /app/jdk
+  register: export
+
+- debug:
+    var: export.stdout_lines
+
+- name: create backup directory if not exist
+  file:
+    path: /home/oracle/backup
+    state: directory
+
+- name: copy export to backup directory
+  copy:
+    src: /app/ldap_instance/OUD/full_export.ldif
+    dest: /home/oracle/backup/full_export_{{ ansible_date_time.date }}.ldif
+    remote_src: yes

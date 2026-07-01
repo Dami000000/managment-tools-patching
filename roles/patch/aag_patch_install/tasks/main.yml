@@ -1,0 +1,4 @@
+---
+- include_tasks: aag_install.yml
+  tags: aag_install
+  

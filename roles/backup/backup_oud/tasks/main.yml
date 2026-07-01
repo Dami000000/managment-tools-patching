@@ -1,0 +1,5 @@
+---
+- include_tasks: export_ldif.yml
+- include_tasks: ../roles/stop_cots/stop_oud/tasks/stop_oud.yml
+- include_tasks: backup_oud.yml
+- include_tasks: ../roles/start_cots/start_oud/tasks/start_oud.yml

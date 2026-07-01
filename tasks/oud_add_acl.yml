@@ -1,0 +1,180 @@
+---
+
+- name: Backup existing config.ldif
+  copy:
+    src: /app/ldap_instance/OUD/config/config.ldif
+    dest: /app/ldap_instance/OUD/config/config_{{ ansible_date_time.date }}.ldif.bck
+    remote_src: yes
+
+########################################
+
+# - name: check External changelog access
+#   schell: "grep -i 'External changelog access' /app/ldap_instance/OUD/config/config.ldif"
+#   register: external_changelog
+
+# - name: Remove the existing changelog ACI if deny
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/OUD/bin/dsconfig set-access-control-handler-prop \
+#       --remove \
+#       global-aci:"(target=\"ldap:///cn=changelog\")(targetattr=\"*\")(version 3.0; acl \"External changelog access\"; deny (all) userdn=\"ldap:///anyone\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+#   when: "'deny' in external_changelog.stdout"
+
+# - name: Add External changelog ACI if deny
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/OUD/bin/dsconfig set-access-control-handler-prop \
+#       --add \
+#       global-aci:"(target=\"ldap:///cn=changelog\")(targetattr=\"*\")(version 3.0; acl \"External changelog access\"; allow (read,search,compare,add,write,delete,export) groupdn=\"ldap:///cn=OIMAdministrators,cn=groups,dc=example,dc=com\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+#   when: "'deny' in external_changelog.stdout"
+
+# - name: Add the  ACI 1.3.6.1.4.1.26027.1.5.4 for cn=oimAdminGroup
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/bin/dsconfig set-access-control-handler-prop \
+#       --add global-aci:"(targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\")(version 3.0;acl \"OIMAdministrators control access\"; allow(read) groupdn=\"ldap:///cn=oimAdminGroup,cn=roles,cn=security,dc=ccn2,dc=eu\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+# - name: Add the  ACI lastExternalChangelogCookie
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/bin/dsconfig set-access-control-handler-prop \
+#       --add global-aci:"(target=\"ldap:///\")(targetscope=\"base\")(targetattr=\"lastExternalChangelogCookie\")(version 3.0; acl \"User-VisiblelastExternalChangelog\"; allow (read,search,compare) groupdn=\"ldap:///cn=OIMAdministrators,cn=roles,cn=security,dc=ccn2,dc=eu\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+# - name: Add the ACI 1.3.6.1.4.1.26027.1.5.4 for Authenticated users control access
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/bin/dsconfig set-access-control-handler-prop \
+#       --add global-aci:"(targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\")(version 3.0; acl \"Authenticated users control access\"; allow(read) userdn=\"ldap:///all\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+# - name: Add the ACI 1.3.6.1.4.1.26027.2.3.4 for Authenticated users control access
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/bin/dsconfig set-access-control-handler-prop \
+#       --add global-aci:"(targetcontrol=\"1.3.6.1.4.1.26027.2.3.4\")(version 3.0; acl \"Authenticated users control access\"; allow(read) userdn=\"ldap:///all\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+# - name: Remove ACI 1.2.840.113556.1.4.319 from Authenticated users control access
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/OUD/bin/dsconfig set-access-control-handler-prop \
+#       --remove \
+#       global-aci:"(targetcontrol=\"1.2.840.113556.1.4.319\")(version 3.0; acl \"Authenticated users control access\"; deny (all) userdn=\"ldap:///all\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+# - name: Add ACI 1.2.840.113556.1.4.319 to Anonymous control acces
+#   shell:
+#     cmd:
+#       '/app/ldap_instance/bin/dsconfig set-access-control-handler-prop \
+#       --add global-aci:"(targetcontrol=\"1.2.840.113556.1.4.319\")(version 3.0; acl \"Anonymous control access\"; allow(read) userdn=\"ldap:///anyone\";)" \
+#       --hostname localhost \
+#       --port 4444 \
+#       --trustAll \
+#       --bindDN "cn=Directory Manager" \
+#       --bindPasswordFile /app/security/OUD/pwd.txt \
+#       --no-prompt'
+
+
+
+
+ ############################################     
+##1
+
+- name: Add lastExternalChangelogCookie 
+  lineinfile: 
+    path: /app/ldap_instance/OUD/config/config.ldif
+    line: 'ds-cfg-global-aci: (target="ldap:///")(targetscope="base")(targetattr="lastExternalChangelogCookie")(version 3.0; acl "User-Visible lastExternalChangelog"; allow (read,search,compare) groupdn="ldap:///cn=OIMAdministrators,cn=roles,cn=security,dc=ccn2,dc=eu";)'
+    insertafter: '.*Anonymous extended operation access.*'
+
+- name: Edit External changelog access from deny to allow
+  lineinfile: 
+    path: /app/ldap_instance/OUD/config/config.ldif
+    regexp: '.*External changelog access.*'
+    line: 'ds-cfg-global-aci: (target="ldap:///cn=changelog")(targetattr="*")(version 3.0; acl "External changelog access"; allow (read,search,compare,add,write,delete,export) groupdn="ldap:///cn=OIMAdministrators,cn=roles,cn=security,dc=ccn2,dc=eu";)'
+
+- name: Edit ACL for Authenticated users control access - Add 1.3.6.1.4.1.26027.1.5.4 &  1.3.6.1.4.1.26027.2.3.4
+  lineinfile: 
+    path: /app/ldap_instance/OUD/config/config.ldif
+    regexp: '.*Authenticated users control access.*'
+    line: 'ds-cfg-global-aci: (targetcontrol="1.3.6.1.1.12 || 1.3.6.1.1.13.1 || 1.3.6.1.1.13.2 || 1.2.826.0.1.3344810.2.3 || 2.16.840.1.113730.3.4.18 || 2.16.840.1.113730.3.4.9 || 1.2.840.113556.1.4.473 || 1.3.6.1.4.1.42.2.27.9.5.9 || 1.3.6.1.4.1.26027.1.5.4 || 1.3.6.1.4.1.26027.2.3.4") (version 3.0; acl "Authenticated users control access"; allow(read) userdn="ldap:///all";)'
+
+# - name: Add ACL - 2
+#   lineinfile: 
+#     path: /app/ldap_instance/OUD/config/config.ldif
+#     line: 'ds-cfg-global-aci: (targetcontrol="1.3.6.1.4.1.26027.1.5.4")(version 3.0; acl "OIMAdministrators control access"; allow(read)  groupdn="ldap:///cn=oimAdminGroup,cn=roles,cn=security,dc=ccn2,dc=eu";)'
+#     insertafter: '.*Authenticated users control access.*'
+
+
+- name: Add ACL for Anonymous control access - 1.2.840.113556.1.4.319
+  lineinfile: 
+    path: /app/ldap_instance/OUD/config/config.ldif
+    regexp: '.*Anonymous control access.*'
+    line: 'ds-cfg-global-aci: (targetcontrol="2.16.840.1.113730.3.4.2 || 2.16.840.1.113730.3.4.17 || 2.16.840.1.113730.3.4.19 || 1.3.6.1.4.1.4203.1.10.2 || 1.3.6.1.4.1.42.2.27.8.5.1 || 2.16.840.1.113730.3.4.16 || 2.16.840.1.113894.1.8.31 || 1.2.840.113556.1.4.319") (version 3.0; acl "Anonymous control access"; allow(read) userdn="ldap:///anyone";)'
+    
+
+########################################
+
+# #2 not tested
+# - name: Add global ACI target control 1.3.6.1.4.1.26027.1.5.4
+#   ldap_attr:
+#     ldaps_port: 1389
+#     bind_dn: "cn=Directory Manager"
+#     bind_password: "mFreyN_5u3ZsUxQm"
+#     changes:
+#       - aci: "targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\")(version 3.0; acl \"Authenticated users control access\"; allow (read) userdn=\"ldap:///all\";)"
+
+# - name: Add global ACI target control 1.3.6.1.4.1.26027.1.5.4 - group
+#   ldap_attr:
+#     ldaps_port: 1389
+#     bind_dn: "cn=Directory Manager"
+#     bind_password: "mFreyN_5u3ZsUxQm"
+#     changes:
+#       - aci: "targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\")(version 3.0; acl \"OIMAdministrators control access\"; allow (read) groupdn=\"ldap:///cn=oimAdminGroup,cn=roles,cn=security,dc=ccn2,dc=eu\";)"
+
+# - name: Add global ACI target control 1.3.6.1.4.1.26027.2.3.4
+#   ldap_attr:
+#     ldaps_port: 1389
+#     bind_dn: "cn=Directory Manager"
+#     bind_password: "mFreyN_5u3ZsUxQm"
+#     changes:
+#       - aci: "targetcontrol=\"1.3.6.1.4.1.26027.2.3.4\")(version 3.0; acl \"Authenticated users control access\"; allow (read) userdn=\"ldap:///all\";)"
+

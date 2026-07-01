@@ -1,0 +1,5 @@
+---
+- include_tasks: roles/stop_cots/tasks/stop_oam.yml
+- include_tasks: oam_install.yml
+- include_tasks: roles/start_cots/tasks/start_oam.yml
+  

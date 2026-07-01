@@ -1,0 +1,71 @@
+[all:vars]
+ansible_user=oracle 
+ansible_connection=ssh 
+
+### OUD ###
+[oud_ap1]
+oud1.ap1.fat.ccn2.taxud
+oud2.ap1.fat.ccn2.taxud
+[oud_ap2]
+oud1.ap2.fat.ccn2.taxud
+oud2.ap2.fat.ccn2.taxud
+[oud_mh]
+oud1.mh.fat.ccn2.taxud
+oud2.mh.fat.ccn2.taxud
+[oud:children]
+oud_ap1
+oud_ap2
+oud_mh
+
+### OHS ###
+[ohs_ap1]
+ohs1.ap1.fat.ccn2.taxud
+ohs2.ap1.fat.ccn2.taxud
+[ohs_ap2]
+ohs1.ap2.fat.ccn2.taxud
+ohs2.ap2.fat.ccn2.taxud
+[ohs:children]
+ohs_ap1
+ohs_ap2
+
+### OAM ###
+[oam_ap1]
+oam1.ap1.fat.ccn2.taxud
+oam2.ap1.fat.ccn2.taxud
+[oam_ap2]
+oam1.ap2.fat.ccn2.taxud
+oam2.ap2.fat.ccn2.taxud
+[oam:children]
+oam_ap1
+oam_ap2
+
+
+### OIM ###
+[oim]
+oim1.mh.fat.ccn2.taxud
+oim2.mh.fat.ccn2.taxud
+
+
+### OSB ###
+[osb_ap1]
+osb1.ap1.fat.ccn2.taxud
+osb2.ap1.fat.ccn2.taxud
+[osb_ap2]
+osb1.ap2.fat.ccn2.taxud
+osb2.ap2.fat.ccn2.taxud
+[osb:children]
+osb_ap1
+osb_ap2
+
+
+
+### AAG ##
+[aag_ap1]
+aag1.ap1.fat.ccn2.taxud
+aag2.ap1.fat.ccn2.taxud
+[aag_ap2]
+aag1.ap2.fat.ccn2.taxud
+aag2.ap2.fat.ccn2.taxud
+[aag:children]
+aag_ap1
+aag_ap2

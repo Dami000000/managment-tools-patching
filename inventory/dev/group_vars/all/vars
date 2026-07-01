@@ -1,0 +1,20 @@
+---
+oracle_user: oracle
+oracle_group: oinstall
+
+
+env: dev
+
+#OPatch variables
+opatch_home_oud: /app/fmwOUD12214/OPatch
+opatch_home_oam: /app/fmwOAM12214/OPatch
+opatch_home_ohs: /app/fmwOHS12214/OPatch
+# opatch_home_oim:
+# opatch_home_osb:
+
+#Patches variables
+binaries_dir: /app/binaries
+
+
+
+#ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

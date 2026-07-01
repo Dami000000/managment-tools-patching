@@ -1,0 +1,131 @@
+---
+- name: Check OIM Node Manager process OIM
+  shell: "pgrep -f 'startNodeManager'"
+  register: nodemanager_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIM Managed server process SOA
+  shell: "pgrep -f 'config/fmwconfig/servers/wls_oim'"
+  register: managed_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIM Managed server process
+  shell: "pgrep -f 'config/fmwconfig/servers/wls_soa'"
+  register: managed_process_soa_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIM Admin Server process
+  shell: "pgrep -f '/bin/startWebLogic.sh'"
+  register: admin_process_check
+  ignore_errors: yes
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+  changed_when: False
+  failed_when: False
+
+- name: Start OIM Admin Server 
+  shell:
+#    cmd: "./startWebLogic.sh"
+    cmd: 'nohup {{ admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
+#    chdir: "{{ admin_server_domain }}/bin"
+  register: startAdminServer_out
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - admin_process_check.rc != 0
+
+- name: Wait for OIM Admin Server to Start
+  wait_for:
+    host: oim-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud
+    port: "{{ admin_server_port }}"
+    delay: 10
+    timeout: 300
+  # when: 
+  #   - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+  #   - admin_process_check.rc != 0
+
+- name: Start OIM NodeManager
+  shell:
+    cmd: "nohup ./startNodeManager.sh &"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startNodeManager_out
+  when: 
+    - nodemanager_process_check.rc != 0
+
+- name: Start OIM Managed Server - SOA node1
+  shell: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ managed_servers_node1[1].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}} &"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startManagedServer_out
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - managed_process_soa_check.rc != 0
+
+- name: Wait for SOA1  to Start
+  wait_for:
+    host: oim1-{{ ap }}-soavip.bck.{{ env }}.ccn2.taxud
+    port: "{{ soa_port }}"
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+
+- name: Start OIM Managed Server - OIM node1
+  shell: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ managed_servers_node1[0].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}} &"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startManagedServer_out
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - managed_process_check.rc != 0
+
+- name: Wait for OIM  to Start
+  wait_for:
+    host: oim1-{{ ap }}-oimvip.bck.{{ env }}.ccn2.taxud
+    port: 14000
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+
+
+- name: Start OIM Managed Server - SOA node2
+  shell: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ managed_servers_node2[1].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}} &"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startManagedServer2_out
+  when: 
+    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - managed_process_soa_check.rc != 0
+
+- name: Wait for SOA2  to Start
+  wait_for:
+    host: oim2-{{ ap }}-soavip.bck.{{ env }}.ccn2.taxud
+    port: "{{ soa_port }}"
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
+
+- name: Start OIM Managed Server - OIM node2
+  shell: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ managed_servers_node2[0].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}} &"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startManagedServer2_out
+  when: 
+    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - managed_process_check.rc != 0
+
+- name: Wait for OIM2  to Start
+  wait_for:
+    host: oim2-{{ ap }}-oimvip.bck.{{ env }}.ccn2.taxud
+    port: "{{ managed_server_port }}"
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'

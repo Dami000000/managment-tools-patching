@@ -1,0 +1,26 @@
+---
+- name: Upload Java patch {{ java_patch_archive }}
+  copy:
+    src: /app/binaries/OHS/{{ java_patch_archive }}
+    dest: "{{ binaries_dir }}/{{ java_patch_archive }}"
+
+- name: Unzip Java patch
+  unarchive:
+    src: "{{ binaries_dir }}/{{ java_patch_archive }}"
+    dest: "{{ binaries_dir }}"
+    remote_src: yes
+    list_files: true
+  register: zip_content
+
+- set_fact:
+    java_patch_id: "{{ zip_content.files[0][:-1] }}"
+
+- name: "Apply Java patch"
+  shell:
+    cmd: "{{ opatch_home }}/opatch apply -silent"
+    chdir: "{{ binaries_dir }}/{{ java_patch_id }}/"
+  register: java_patch_out
+
+
+- debug:
+    var: java_patch_out.stdout_lines

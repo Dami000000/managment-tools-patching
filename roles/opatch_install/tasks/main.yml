@@ -1,0 +1,2 @@
+---
+- include_tasks: opatch_install.yml

@@ -1,0 +1,53 @@
+---
+
+- name: Check OSB NodeManager Server process
+  shell: "pgrep -f 'startNodeManager'"
+  register: osbNM_process_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Check OSB Admin Server process
+  shell: "pgrep -f 'startWebLogic.sh'"
+  register: OSBAdmin_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Check OSB Managed Server process
+  shell: "pgrep -f 'osb_server'"
+  register: OSB_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Start OSB NodeManager
+  shell: 
+    cmd: "nohup ./startNodeManager.sh &" 
+    chdir: "{{ managed_server_domain }}/bin"
+  register: startNM
+  when:
+    - osbNM_process_check.rc != 0
+- debug:
+    var: startNM.stdout_lines
+
+- name: Start OSB Admin Server  
+  shell: 
+    cmd: 'nohup {{ admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
+  register: startAdmin
+  when:
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+    - OSBAdmin_check.rc != 0
+
+- name: Wait for OSB Admin Server to Start
+  wait_for:
+    host: osb1.{{ ap }}.{{ env }}.ccn2.taxud
+    port: "{{ admin_server_port }}"
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+    - OSBAdmin_check.rc != 0
+
+# - name: Start OSB Managed Server
+#   shell: 

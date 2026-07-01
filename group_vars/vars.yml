@@ -1,0 +1,24 @@
+oracle_user: oracle
+oracle_group: oinstall
+
+#OPatch variables
+opatch_home_oud: /app/fmwOUD12214/OPatch
+opatch_home_oam: /app/fmwOAM12214/OPatch
+opatch_home_ohs: /app/fmwOHS12214/OPatch
+
+# #Patches variables
+binaries_dir: /app/binaries
+# oud_patch_archive: p34964109_12214210406_Generic.zip
+# oam_patch_archive: p34241746_12214210607_Generic.zip
+# patch_id: 34241746
+
+#OAM
+oam_admin_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud:7001"
+oam_managed_server_domain: /app/config/mserver/domains/IAMAccessDomain
+oam_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMAccessDomain
+# oam1_node: "oam1.{{ ap }}.{{ env }}.ccn2.taxud"
+# oam2_node: "oam2.{{ ap }}.{{ env }}.ccn2.taxud"
+
+#OUD
+
+#ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

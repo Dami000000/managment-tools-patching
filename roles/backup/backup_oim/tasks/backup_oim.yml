@@ -1,0 +1,25 @@
+---
+- name: create backup directory if not exist
+  file:
+    path: /home/oracle/backup
+    state: directory
+
+- name: create backup of OIM Managed Server configuration files - /app/config
+  archive:
+    path: /app/config
+    dest: /home/oracle/backup/OIM_config_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+
+- name: create backup of OIM MAnaged serverbinaries /app/fmwOIM12214
+  archive:
+    path: /app/fmwOIM12214
+    dest: /home/oracle/backup/fmwOIM12214_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+
+- name: create backup of OIM Admin Server configuration files - /mnt/nfs/config
+  archive:
+    path: /mnt/nfs/config
+    dest: /home/oracle/backup/Admin_OIM_config_{{ ansible_date_time.date }}_full_buckup.tar.gz
+    format: gz
+  when: 
+    - inventory_hostname == 'oim1.mh.{{ env }}.ccn2.taxud'

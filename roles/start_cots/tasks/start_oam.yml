@@ -1,0 +1,87 @@
+---
+- name: Start OAM NodeManager
+  shell:
+    cmd: "nohup ./startNodeManager.sh &"
+    chdir: "{{ oam_managed_server_domain }}/bin"
+  register: startNodeManager_out
+- debug: 
+     var: startNodeManager_out.stdout_lines 
+
+- name: Check OAM Managed server process
+  shell: "pgrep -f '/IAMAccessDomain/config/fmwconfig/servers/wls_'"
+  register: managed_process_check
+  ignore_errors: yes
+
+- name: Check OAM Admin Server process
+  shell: "pgrep -f '/mnt/nfs/config/aserver/domains/IAMAccessDomain/bin/startWebLogic.sh'"
+  register: admin_process_check
+  ignore_errors: yes
+  when: 
+    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+
+- name: Start OAM Admin Server
+  shell:
+    cmd: 'nohup {{ oam_admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ oam_admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
+  # register: startOAMAdminServer_out
+  when: 
+    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    # - admin_process_check.rc != 0
+# - debug: 
+#     var: startOAMAdminServer_out.stdout_lines
+#   when: inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+
+- name: Wait for OAM Admin Server to Start
+  wait_for:
+    host: oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud
+    port: 7001
+    delay: 10
+    timeout: 300
+  when: 
+    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    # - admin_process_check.rc != 0
+  
+
+
+
+### STARTING MANAGED SERVERS NOT WORKING
+
+# - name: Start OAM Managed Servers wls_oam1
+#   shell:
+#     cmd: "nohup ./startManagedWebLogic.sh  wls_oam1 {{ oam_admin_url }} weblogic qX8yA_7e9ZgWjDvP &"
+#     chdir: "{{ oam_managed_server_domain }}/bin"
+#   register: startMenagedServer_out
+#   when: inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+# - debug: 
+#     var: startMenagedServer_out.stdout_lines 
+#   when: inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+
+# - name: Wait for OAM wls_oam1 to Start
+#   wait_for:
+#     host: oam1.{{ ap }}.{{ env }}.ccn2.taxud
+#     port: 14100
+#     delay: 10
+#     timeout: 300
+#   when: inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+  
+# - name: Start OAM Managed Servers -node 2
+#   shell:
+#     cmd: "nohup startManagedWebLogic.sh  wls_oam2 {{ oam_admin_url }} &"
+#     chdir: "{{ oam_managed_server_domain }}/bin"
+#   register: startMenagedServer2_out
+#   when: inventory_hostname == {{ oam2_ap1 }}
+# - debug: 
+#     var: startMenagedServer2_out.stdout_lines 
+#   when: inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
+
+# - name: Wait for OAM wls_oam2 to Start
+#   wait_for:
+#     host: oam2.{{ ap }}.{{ env }}.ccn2.taxud
+#     port: 14100
+#     delay: 10
+#     timeout: 300
+#   when: inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
+
+# - name: Delete content & directory
+#   file:
+#     state: absent
+#     path: "{{ binaries_dir }}/{{ patch_id }}"

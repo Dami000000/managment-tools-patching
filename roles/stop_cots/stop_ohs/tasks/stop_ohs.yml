@@ -1,0 +1,65 @@
+---
+
+- name: Check OHS NodeManager Server process
+  shell: "pgrep -f 'startNodeManager'"
+  register: ohsNM_process_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Check OHS Instance Server process
+  shell: "pgrep -f '/ohs/bin/httpd'"
+  register: ohs_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Stop OHS
+  shell: 'ohs stop'
+  environment:
+    JAVA_HOME: /app/jdk
+    PATH: /usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin:/usr/sbin:/app/jdk/bin:/app/scripts
+  register: stopohs_out
+  when: ohs_check.rc == 0
+# - debug:
+#     var: stopohs_out.stdout_lines
+
+- name: Shutdown NodeManager
+  shell: 
+    cmd: "./stopNodeManager.sh" 
+    chdir: /app/config/mserver/domains/IAMGovernanceDomain/bin  
+  register: stopNM
+  when:
+    - ohsNM_process_check.rc == 0
+# - debug:
+#     var: stopNM.stdout_lines
+
+
+
+# - name: Stop OHS Instance - node 1
+#   shell: 
+#     cmd: "./stopComponent.sh ohs1"
+#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
+#   when: inventory_hostname == groups['ohs_dev_ap2'][0]
+#   register: startohs_out
+# - debug:
+#     var: startohs_out.stdout_lines
+#   when: inventory_hostname == groups['ohs_dev_ap2'][0]
+
+# - name: Stop OHS Instance - node 2
+#   shell: 
+#     cmd: "./stopComponent.sh ohs2"
+#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
+#   when: inventory_hostname == groups['ohs_dev_ap2'][1]
+#   register: startohs_out
+# - debug:
+#     var: startohs_out.stdout_lines
+#   when: inventory_hostname == groups['ohs_dev_ap2'][1]
+
+# - name: Shutdown NodeManager
+#   shell: 
+#     cmd: "./stopNodeManager.sh" 
+#     chdir: /app/config/mserver/domains/IAMGovernanceDomain/bin  
+#   register: stopNM
+# - debug:
+#     var: stopNM.stdout_lines

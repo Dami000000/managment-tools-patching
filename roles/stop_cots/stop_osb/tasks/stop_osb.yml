@@ -1,0 +1,64 @@
+---
+- name: Check OSB NodeManager Server process
+  shell: "pgrep -f 'startNodeManager'"
+  register: osbNM_process_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Check OSB Admin Server process
+  shell: "pgrep -f 'startWebLogic.sh'"
+  register: OSBAdmin_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Check OSB Managed Server process
+  shell: "pgrep -f 'osb_server'"
+  register: OSB_check
+  ignore_errors: True
+  changed_when: False
+  failed_when: False
+
+- name: Shutdown OSB Managed Server - node1
+  shell: 
+    cmd: "./stopManagedWebLogic.sh {{ managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}}"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: stopManagedServer_out
+  when: 
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+    - OSB_check.rc == 0
+- debug: 
+     var: stopManagedServer_out.stdout_lines
+
+- name: Shutdown OSB Managed Server - node2
+  shell: 
+    cmd: "./stopManagedWebLogic.sh {{ managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}}"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: stopManagedServer2_out
+  when: 
+    - inventory_hostname == 'osb2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - OSB_check.rc == 0
+- debug: 
+    var: stopManagedServer2_out.stdout_lines
+
+- name: Shutdown OSB Admin Servers 
+  shell:
+    cmd: "./stopWebLogic.sh"
+    chdir: "{{ admin_server_domain }}/bin"
+  register: stopAdminServer_out
+  when: 
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+    - OSBAdmin_check.rc == 0
+- debug: 
+    var: stopAdminServer_out.stdout_lines
+
+- name: Shutdown OSB NodeManager
+  shell:
+    cmd: "./stopNodeManager.sh"
+    chdir: "{{ managed_server_domain }}/bin"
+  register: stopNodeManager_out
+  when:
+    - osbNM_process_check.rc == 0
+- debug: 
+    var: stopNodeManager_out.stdout_lines

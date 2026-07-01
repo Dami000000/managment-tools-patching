@@ -1,0 +1,8 @@
+---
+- name: Shutdown AAG
+  shell:
+    cmd: "./aagStop.sh"
+    chdir: /app/scripts/
+  register: stopaag
+- debug:
+  var: stopaag.stdout_lines

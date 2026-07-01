@@ -1,0 +1,30 @@
+- name: Upload SPBAT Soa Bundle Patch {{ SOAbundle_archive }}
+  copy:
+    src: /app/binaries/OSB/{{ SOAbundle_archive }}
+    dest: "{{ binaries_dir }}/{{ SOAbundle_archive }}"
+
+- name: Unzip Patch SOAbundle
+  unarchive:
+    src: "{{ binaries_dir }}/{{ SOAbundle_archive }}"
+    dest: "{{ binaries_dir }}"
+    remote_src: yes
+    list_files: true
+  register: zip_content
+
+- set_fact:
+    spbat_patch_id: "{{ zip_content.files[0][:-1] }}"
+
+- name: Execute precheck spbat script 
+  shell: 
+    cmd: "{{ binaries_dir }}/{{ spbat_patch_id }}/tools/spbat/generic/SPBAT/./spbat.sh -phase precheck -oracle_home {{ oracle_home }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+
+- name: Apply spbat patch
+  shell: 
+    cmd: "{{ binaries_dir }}/{{ spbat_patch_id }}/tools/spbat/generic/SPBAT/./spbat.sh -phase apply -oracle_home {{ oracle_home }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+

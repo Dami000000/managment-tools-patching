@@ -1,0 +1,14 @@
+---
+
+
+- name: "Rollback patch"
+  shell:
+    cmd: "{{ opatch_home }}/opatch rollback -id {{ rollback_patch_id }} -silent"
+    chdir: "{{ binaries_dir }}/{{ rollback_patch_id }}/"
+
+  register: opatch_rollback_out
+
+- debug:
+    var: opatch_rollback_out.stdout_lines
+
+

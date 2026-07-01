@@ -1,0 +1,14 @@
+---
+opatch_home: /app/fmwOAM12214/OPatch
+admin_server_url:  't3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud'
+admin_server_port: 7001
+managed_server_domain: "/app/config/mserver/domains/IAMAccessDomain"
+admin_server_domain: "/mnt/nfs/config/aserver/domains/IAMAccessDomain"
+# managed_server_node1: wls_oam1
+# managed_server_node2: wls_oam2
+managed_servers_node1:
+    - managed_server_node1: wls_oam1
+    - managed_server_node1: wls_ama1
+managed_servers_node2:
+    - managed_server_node2: wls_oam2
+    - managed_server_node2: wls_ama2

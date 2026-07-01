@@ -1,0 +1,15 @@
+---
+- name: Change Purge delay to 4d 4h
+  shell: '/app/fmwOUD12214/oud/bin/dsconfig -h localhost -p 4444 -D "cn=Directory Manager" -j /app/security/OUD/pwd.txt -X set-replication-server-prop --provider-name "Multimaster Synchronization" --set "replication-purge-delay:4d4h" --no-prompt --script-friendly'
+  environment:
+    JAVA_HOME: /app/jdk
+
+- name: Check OUD purge delay
+  shell: '/app/fmwOUD12214/oud/bin/dsconfig -h localhost -p 4444 -D "cn=Directory Manager" -j /app/security/OUD/pwd.txt -X -n get-replication-server-prop --provider-name "Multimaster Synchronization" --advanced --property replication-purge-delay'
+  environment:
+    JAVA_HOME: /app/jdk
+  register: purge_delay
+
+- debug:
+    var: purge_delay.stdout_lines
+  
