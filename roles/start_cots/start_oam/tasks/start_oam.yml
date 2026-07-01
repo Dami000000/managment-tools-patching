@@ -50,7 +50,7 @@
 - name: Wait for OAM Admin Server to Start
   wait_for:
     host: oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud
-    port: 7001
+    port: "{{ oam_admin_server_port }}"
     delay: 10
     timeout: 300
   when:
@@ -68,7 +68,7 @@
 - name: Wait for OAM node1 to Start
   wait_for:
     host: oam1.{{ ap }}.{{ env }}.ccn2.taxud
-    port: 14100
+    port: "{{ oam_managed_server_port }}"
     delay: 10
     timeout: 300
   when:
@@ -86,7 +86,7 @@
 - name: Wait for OAM node2 to Start
   wait_for:
     host: oam2.{{ ap }}.{{ env }}.ccn2.taxud
-    port: 14100
+    port: "{{ oam_managed_server_port }}"
     delay: 10
     timeout: 300
   when:
@@ -104,7 +104,7 @@
 - name: Wait for OAM wls_ama1 to Start
   wait_for:
     host: oam1.{{ ap }}.{{ env }}.ccn2.taxud
-    port: 14150
+    port: "{{ oam_ama_server_port }}"
     delay: 10
     timeout: 300
   when:
@@ -122,7 +122,7 @@
 - name: Wait for OAM wls_ama2 to Start
   wait_for:
     host: oam2.{{ ap }}.{{ env }}.ccn2.taxud
-    port: 14150
+    port: "{{ oam_ama_server_port }}"
     delay: 10
     timeout: 300
   when:

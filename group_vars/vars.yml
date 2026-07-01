@@ -10,7 +10,7 @@ oracle_group: oinstall
 opatch_home_oud: /app/fmwOUD12214/OPatch
 opatch_home_oam: /app/fmwOAM12214/OPatch
 opatch_home_ohs: /app/fmwOHS12214/OPatch
-opatch_home_oig: /app/fmwOIG12214/OPatch
+opatch_home_oig: /app/fmwOIM12214/OPatch
 opatch_home_osb: /app/fmwOSB12214/OPatch
 
 # ============================================================
@@ -18,7 +18,7 @@ opatch_home_osb: /app/fmwOSB12214/OPatch
 # ============================================================
 oracle_home_oam: /app/fmwOAM12214
 oracle_home_ohs: /app/fmwOHS12214
-oracle_home_oig: /app/fmwOIG12214
+oracle_home_oig: /app/fmwOIM12214
 oracle_home_osb: /app/fmwOSB12214
 oracle_home_oud: /app/fmwOUD12214
 
@@ -70,6 +70,8 @@ oam_oracle_home: "{{ oracle_home_oam }}"
 oam_admin_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud:7001"
 oam_admin_server_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
 oam_admin_server_port: 7001
+oam_managed_server_port: 14100
+oam_ama_server_port: 14150
 
 oam_managed_server_domain: /app/config/mserver/domains/IAMAccessDomain
 oam_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMAccessDomain
@@ -100,23 +102,24 @@ oam_patches_id:
   - patch_id: 36739303
 
 # ============================================================
-# OIG (OIM) specific variables
+# OIG specific variables
+# oracle_home_oig = /app/fmwOIM12214 (OIG uses OIM binaries path)
 # ============================================================
-oig_admin_server_url: "t3://oim-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
-oig_admin_server_port: 7001
+oig_admin_server_url: "t3://oig-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
+oig_admin_server_port: 7101
 oig_managed_server_port: 14000
 oig_soa_port: 8001
 
-oig_managed_server_domain: /app/config/mserver/domains/IAMGovernanceDomain
-oig_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMGovernanceDomain
+oig_managed_server_domain: /app/config/mserver/domains/IAMGovernanceDomain12c
+oig_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMGovernanceDomain12c
 
-# OIG managed servers per node (order: wls_oim, wls_soa)
+# OIG managed servers per node (order: wls_oig, wls_soa)
 oig_managed_servers_node1:
-  - managed_server_node1: wls_oim1
+  - managed_server_node1: wls_oig1
   - managed_server_node1: wls_soa1
 
 oig_managed_servers_node2:
-  - managed_server_node2: wls_oim2
+  - managed_server_node2: wls_oig2
   - managed_server_node2: wls_soa2
 
 # OIG WebLogic credentials (use ansible-vault to encrypt oig_wls_password!)
@@ -132,6 +135,36 @@ oig_patches_to_apply:
 
 oig_patches_id:
   - patch_id: 36946553
+
+# ============================================================
+# OSB specific variables
+# osb_domain = /app/domains/OSB_dom (single path for admin and managed)
+# ============================================================
+osb_admin_server_url: "t3://osb1.{{ ap }}.{{ env }}.ccn2.taxud"
+osb_admin_server_port: 7001
+osb_managed_server_port: 7010
+
+osb_domain: /app/domains/OSB_dom
+
+osb_managed_server_node1: osb_server1
+osb_managed_server_node2: osb_server2
+
+# OSB WebLogic credentials (use ansible-vault to encrypt osb_wls_password!)
+osb_wls_user: weblogic
+osb_wls_password: "CHANGE_ME_USE_VAULT"
+
+# OSB patch archives
+osb_bundle_archive: p34980707_122140_Generic.zip
+
+osb_patches_to_apply:
+  - patch_archive: p34549208_122140_Generic.zip
+  - patch_archive: p34839859_122140_Generic.zip
+  - patch_archive: p33950717_122140_Generic.zip
+
+osb_patches_id:
+  - patch_id: 34549208
+  - patch_id: 34839859
+  - patch_id: 33950717
 
 # ============================================================
 # SSH / Ansible connection
