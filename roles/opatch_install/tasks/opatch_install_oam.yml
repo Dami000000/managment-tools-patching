@@ -1,0 +1,31 @@
+---
+- name: Upload OPatch archive {{ opatch_archive }}
+  copy:
+    src: "{{ patches_dir_oam }}/{{ opatch_archive }}"
+    dest: "{{ binaries_dir }}/{{ opatch_archive }}"
+
+- name: Unzip OPatch
+  unarchive:
+    src: "{{ binaries_dir }}/{{ opatch_archive }}"
+    dest: "{{ binaries_dir }}"
+    remote_src: yes
+    list_files: true
+  register: zip_content
+
+- set_fact:
+    opatch_id: "{{ zip_content.files[0][:-1] }}"
+
+- debug:
+    var: opatch_id
+
+- name: Apply OPatch for OAM (oracle_home={{ oracle_home_oam }})
+  shell:
+    cmd: "java -jar {{ binaries_dir }}/{{ opatch_id }}/opatch_generic.jar -silent oracle_home={{ oracle_home_oam }}"
+    chdir: "{{ binaries_dir }}/{{ opatch_id }}/"
+  register: opatch_apply_out
+  environment:
+    JAVA_HOME: /app/jdk
+    PATH: "/usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin:/usr/sbin:/app/jdk/bin:/app/scripts"
+
+- debug:
+    var: opatch_apply_out.stdout_lines
