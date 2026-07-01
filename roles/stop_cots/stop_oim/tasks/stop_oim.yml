@@ -1,91 +1,83 @@
 ---
-- name: Check OIM Node Manager process
+- name: Check OIG Node Manager process
   shell: "pgrep -f 'startNodeManager'"
   register: nodemanager_process_check
   ignore_errors: yes
   changed_when: False
   failed_when: False
 
-- name: Check OIM Managed server process OIM
-  shell: "pgrep -f 'config/fmwconfig/servers/wls_oim'"
+- name: Check OIG Managed server process - OIM
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_oim'"
   register: managed_process_check
   ignore_errors: yes
   changed_when: False
   failed_when: False
 
-- name: Check OIM Managed server process SOA
-  shell: "pgrep -f 'config/fmwconfig/servers/wls_soa'"
-  register: managed_process_soa_check
+- name: Check OIG Managed server process - SOA
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_soa'"
+  register: soa_process_check
   ignore_errors: yes
   changed_when: False
   failed_when: False
 
-- name: Check OIM Managed server process
-  shell: "pgrep -f 'config/fmwconfig/servers/wls_oim'"
-  register: managed_process_check
-  ignore_errors: yes
-  changed_when: False
-  failed_when: False
-
-- name: Check OIM Admin Server process
-  shell: "pgrep -f '/bin/startWebLogic.sh'"
+- name: Check OIG Admin Server process
+  shell: "pgrep -f '/app/config/mserver/domains/IAMGovernanceDomain/bin/startWebLogic.sh'"
   register: admin_process_check
   ignore_errors: yes
-  when: 
+  when:
     - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
   changed_when: False
   failed_when: False
 
-
-- name: Shutdown OIM Managed Server - OIM node1
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_servers_node1[0].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
+- name: Shutdown OIG Managed Server - OIM node1
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[0].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
   register: stopManagedServer_out
-  when: 
+  when:
     - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc == 0
 
-- name: Shutdown OIM Managed Server - SOA node1
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_servers_node1[1].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
-  register: stopManagedServer_out
-  when: 
-    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
-    - managed_process_soa_check.rc == 0
-
-- name: Shutdown OIM Managed Server - OIM node2
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_servers_node2[0].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
+- name: Shutdown OIG Managed Server - OIM node2
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[0].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
   register: stopManagedServer2_out
-  when: 
+  when:
     - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc == 0
 
-- name: Shutdown OIM Managed Server - SOA node2
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_servers_node2[1].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
-  register: stopManagedServer2_out
-  when: 
-    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
-    - managed_process_soa_check.rc == 0
+- name: Shutdown OIG SOA Server - SOA node1
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[1].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopSoaServer_out
+  when:
+    - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - soa_process_check.rc == 0
 
-- name: Shutdown OIM Admin Server 
+- name: Shutdown OIG SOA Server - SOA node2
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[1].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopSoaServer2_out
+  when:
+    - inventory_hostname == 'oim2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - soa_process_check.rc == 0
+
+- name: Shutdown OIG Admin Server
   shell:
     cmd: "./stopWebLogic.sh"
-    chdir: "{{ admin_server_domain }}/bin"
+    chdir: "{{ oig_admin_server_domain }}/bin"
   register: stopAdminServer_out
-  when: 
+  when:
     - inventory_hostname == 'oim1.{{ ap }}.{{ env }}.ccn2.taxud'
     - admin_process_check.rc == 0
 
-- name: Shutdown OIM NodeManager
+- name: Shutdown OIG NodeManager
   shell:
     cmd: "./stopNodeManager.sh"
-    chdir: "{{ managed_server_domain }}/bin"
+    chdir: "{{ oig_managed_server_domain }}/bin"
   register: stopNodeManager_out
-  when: 
+  when:
     - nodemanager_process_check.rc == 0

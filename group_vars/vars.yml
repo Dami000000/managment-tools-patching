@@ -100,6 +100,40 @@ oam_patches_id:
   - patch_id: 36739303
 
 # ============================================================
+# OIG (OIM) specific variables
+# ============================================================
+oig_admin_server_url: "t3://oim-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
+oig_admin_server_port: 7001
+oig_managed_server_port: 14000
+oig_soa_port: 8001
+
+oig_managed_server_domain: /app/config/mserver/domains/IAMGovernanceDomain
+oig_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMGovernanceDomain
+
+# OIG managed servers per node (order: wls_oim, wls_soa)
+oig_managed_servers_node1:
+  - managed_server_node1: wls_oim1
+  - managed_server_node1: wls_soa1
+
+oig_managed_servers_node2:
+  - managed_server_node2: wls_oim2
+  - managed_server_node2: wls_soa2
+
+# OIG WebLogic credentials (use ansible-vault to encrypt oig_wls_password!)
+oig_wls_user: weblogic
+oig_wls_password: "CHANGE_ME_USE_VAULT"
+
+# OIG patch archives
+oig_bundle_archive: p34986147_122140_Linux-x86-64.zip
+oig_spbat_patch_id: IDM_SPB_12.2.1.4.230117
+
+oig_patches_to_apply:
+  - patch_archive: p36946553_122140_Generic.zip
+
+oig_patches_id:
+  - patch_id: 36946553
+
+# ============================================================
 # SSH / Ansible connection
 # ============================================================
 #ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

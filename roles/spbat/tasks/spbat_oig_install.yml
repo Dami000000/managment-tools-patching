@@ -1,0 +1,31 @@
+---
+- name: Upload SPBAT OIG Bundle Patch {{ oig_bundle_archive }}
+  copy:
+    src: "{{ patches_dir_oig }}/{{ oig_bundle_archive }}"
+    dest: "{{ binaries_dir }}/{{ oig_bundle_archive }}"
+
+- name: Unzip Patch OIGbundle
+  shell:
+    cmd: "unzip -o {{ oig_bundle_archive }}"
+    chdir: "{{ binaries_dir }}"
+
+- name: Execute pre stop phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ oig_spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oig -phase prestop -mw_home {{ oracle_home_oig }} -spb_download_dir {{ binaries_dir }}/{{ oig_spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+
+- name: Execute downtime phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ oig_spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oig -phase downtime -mw_home {{ oracle_home_oig }} -spb_download_dir {{ binaries_dir }}/{{ oig_spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+
+- name: Execute post start phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ oig_spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oig -phase poststart -mw_home {{ oracle_home_oig }} -spb_download_dir {{ binaries_dir }}/{{ oig_spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines

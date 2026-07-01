@@ -1,0 +1,58 @@
+---
+# ============================================================
+# OIG Patch Playbook
+# ============================================================
+# Usage:
+#   Patch all OIG hosts (default):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml
+#
+#   Patch specific location:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oig_ap1"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oig_ap2"
+#
+#   Patch specific server:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oim1.ap1.dev.ccn2.taxud"
+#
+#   Patch on FAT environment:
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_oig.yml -e "target=oig_ap1"
+#
+#   Override serial (default: 2 hosts at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "serial=1"
+#
+# Default: runs on ALL OIG hosts (ap1 + ap2), 2 hosts at a time
+# ============================================================
+
+- name: OIG Patching
+  hosts: "{{ target | default('oig') }}"
+  serial: "{{ serial | default(2) }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+
+  tasks:
+    - name: Stop OIG services
+      include_tasks: ../roles/stop_cots/stop_oim/tasks/stop_oim.yml
+      tags: [stop, cots]
+
+    - name: Backup OIG
+      include_tasks: ../roles/backup/backup_oim/tasks/backup_oim.yml
+      tags: [backup]
+
+    - name: Install/Update JDK
+      include_tasks: ../roles/jdk/tasks/jdk_install.yml
+      tags: [jdk]
+
+    - name: Install/Update OPatch for OIG
+      include_tasks: ../roles/opatch_install/tasks/opatch_install_oig.yml
+      tags: [opatch]
+
+    - name: Apply SPBAT OIG Bundle Patch
+      include_tasks: ../roles/spbat/tasks/spbat_oig_install.yml
+      tags: [spbat]
+
+    - name: Apply OIG patches
+      include_tasks: ../roles/patch/oig_patch_install/tasks/oig_install.yml
+      tags: [patch]
+
+    - name: Start OIG services
+      include_tasks: ../roles/start_cots/start_oim/tasks/start_oim.yml
+      tags: [start, cots]
