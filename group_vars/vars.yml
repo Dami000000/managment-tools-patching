@@ -1,24 +1,54 @@
+# ============================================================
+# Oracle User / Group
+# ============================================================
 oracle_user: oracle
 oracle_group: oinstall
 
-#OPatch variables
+# ============================================================
+# OPatch home directories (per product, not applicable for AAG)
+# ============================================================
 opatch_home_oud: /app/fmwOUD12214/OPatch
 opatch_home_oam: /app/fmwOAM12214/OPatch
 opatch_home_ohs: /app/fmwOHS12214/OPatch
+opatch_home_oig: /app/fmwOIG12214/OPatch
+opatch_home_osb: /app/fmwOSB12214/OPatch
 
-# #Patches variables
+# ============================================================
+# Binaries directory on TARGET servers
+# Patch archives are copied here and extracted before install
+# ============================================================
 binaries_dir: /app/binaries
-# oud_patch_archive: p34964109_12214210406_Generic.zip
-# oam_patch_archive: p34241746_12214210607_Generic.zip
-# patch_id: 34241746
 
-#OAM
+# ============================================================
+# Patches source directory on ANSIBLE host (where scripts run)
+# Structure:
+#   /app/patches/
+#     ├── JAVA/
+#     ├── AAG/
+#     ├── OAM/
+#     ├── OIG/
+#     ├── OHS/
+#     ├── OUD/
+#     └── OSB/
+# ============================================================
+patches_dir: /app/patches
+
+patches_dir_java: "{{ patches_dir }}/JAVA"
+patches_dir_aag:  "{{ patches_dir }}/AAG"
+patches_dir_oam:  "{{ patches_dir }}/OAM"
+patches_dir_oig:  "{{ patches_dir }}/OIG"
+patches_dir_ohs:  "{{ patches_dir }}/OHS"
+patches_dir_oud:  "{{ patches_dir }}/OUD"
+patches_dir_osb:  "{{ patches_dir }}/OSB"
+
+# ============================================================
+# OAM specific variables
+# ============================================================
 oam_admin_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud:7001"
 oam_managed_server_domain: /app/config/mserver/domains/IAMAccessDomain
 oam_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMAccessDomain
-# oam1_node: "oam1.{{ ap }}.{{ env }}.ccn2.taxud"
-# oam2_node: "oam2.{{ ap }}.{{ env }}.ccn2.taxud"
 
-#OUD
-
+# ============================================================
+# SSH / Ansible connection
+# ============================================================
 #ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
