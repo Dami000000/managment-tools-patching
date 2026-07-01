@@ -1,74 +1,50 @@
 ---
 - name: Delete {{ binaries_dir }} directory contents
   file:
-    path: {{ binaries_dir }}
+    path: "{{ binaries_dir }}"
     state: absent
-    recurse: yes
 
-- name: Upload patch patch_archive
+- name: Recreate {{ binaries_dir }} directory
+  file:
+    path: "{{ binaries_dir }}"
+    state: directory
+
+- name: Upload patch {{ aag_patch_archive }}
   copy:
-    src: templates/{{ patch_archive }}
-    dest: "{{ binaries_dir }}/{{ patch_archive }}"
+    src: "{{ patches_dir_aag }}/{{ aag_patch_archive }}"
+    dest: "{{ binaries_dir }}/{{ aag_patch_archive }}"
 
-#This steps are not confrimed 
-- name: import Axway code signing PGP key with a PGP tool
+- name: Import Axway code signing PGP key
   shell: gpg --import axwaypgp.asc
+  args:
+    chdir: "{{ binaries_dir }}"
 
 - name: Verify the PGP signature
-  shell: gpg --verify installer.tar.gz.asc {{ patch_archive }}
+  shell: gpg --verify installer.tar.gz.asc {{ aag_patch_archive }}
+  args:
+    chdir: "{{ binaries_dir }}"
   register: verify_output
   until: verify_output.stdout.find('Good signature') != -1
   retries: 2
   delay: 10
   failed_when: verify_output.stdout.find('Good signature') == -1
-  rescue:
-    - name: Failure message
-      debug:
-        msg: "Task failed because 'Good signature' phrase was not found in script output."
 
-- name: Unzip Patch
+- name: Unzip patch {{ aag_patch_archive }}
   unarchive:
-    src: "{{ binaries_dir }}/{{ patch_archive }}"
+    src: "{{ binaries_dir }}/{{ aag_patch_archive }}"
     dest: "{{ binaries_dir }}"
     remote_src: yes
     list_files: true
   register: zip_content
 
-- name: Shutdown AAG Instance
-  shell:
-    cmd: "./aagStop.sh"
-    chdir: /app/scripts/
-  register: stopaag
-- debug:
-    var: stopaag.stdout_lines
-
-# - name: create backup the product installation home
-#   archive:
-#     path: /app/Axway-7.7.0
-#     dest: /home/oracle/backup/Axway-7.7.0_{{ ansible_date_time.date }}_full_buckup.tar.gz
-#     format: gz
-
-- name: "Apply patch"
+- name: Apply AAG patch
   shell:
     cmd: "./update_apigw.sh --install_dir /app/Axway-7.7.0/apigateway --no_backup --mode unattended"
     chdir: "{{ binaries_dir }}"
   register: patch_apply_out
-- debug:
-  var: patch_apply_out.stdout_lines
-
-- name: Remove old IBM MQ libraries
-  file:
-    state: absent
-    path: "/app/Axway-7.7.0/apigateway/system/lib/ibmmq"
-
-- name: Start AAG Instance
-  shell:
-    cmd: "./aagStart.sh"
-    chdir: /app/scripts/
-  register: startaag
 
 - debug:
-  var: startaag.stdout_lines
+    var: patch_apply_out.stdout_lines
 
 - name: Verify that patch has been installed correctly
   shell:
@@ -77,15 +53,9 @@
   register: managedomain_version
 
 - debug:
-  var: managedomain_version.stdout_lines
+    var: managedomain_version.stdout_lines
 
-- name: Delete "{{ binaries_dir }}"/ directory contents
+- name: Delete {{ binaries_dir }} directory contents after install
   file:
     path: "{{ binaries_dir }}"
     state: absent
-    recurse: yes
-
-# - name: Delete content & directory
-#   file:
-#     state: absent
-#     path: "{{ binaries_dir }}/{{ patch_id }}"

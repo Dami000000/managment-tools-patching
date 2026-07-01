@@ -1,0 +1,47 @@
+---
+# ============================================================
+# AAG Patch Playbook
+# ============================================================
+# Usage:
+#   Patch all AAG hosts (default):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_aag.yml
+#
+#   Patch specific location:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_aag.yml -e "target=aag_ap1"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_aag.yml -e "target=aag_ap2"
+#
+#   Patch specific server:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_aag.yml -e "target=aag1.ap1.dev.ccn2.taxud"
+#
+#   Patch on FAT environment:
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_aag.yml -e "target=aag_ap1"
+#
+#   Override serial (default: 1 host at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_aag.yml -e "serial=2"
+#
+# Note: AAG does not use OPatch (no Oracle Home)
+# Default: runs on ALL AAG hosts, 1 host at a time
+# ============================================================
+
+- name: AAG Patching
+  hosts: "{{ target | default('aag') }}"
+  serial: "{{ serial | default(1) }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+
+  tasks:
+    - name: Stop AAG services
+      include_tasks: ../roles/stop_cots/stop_aag/tasks/stop_aag.yml
+      tags: [stop, cots]
+
+    - name: Backup AAG
+      include_tasks: ../roles/backup/backup_aag/tasks/backup_aag.yml
+      tags: [backup]
+
+    - name: Apply AAG patch
+      include_tasks: ../roles/patch/aag_patch_install/tasks/aag_install.yml
+      tags: [patch]
+
+    - name: Start AAG services
+      include_tasks: ../roles/start_cots/start_aag/tasks/start_aag.yml
+      tags: [start, cots]

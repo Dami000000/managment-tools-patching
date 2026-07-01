@@ -64,6 +64,16 @@ java_home: /app/jdk
 opatch_archive: p28186730_1394218_Generic.zip
 
 # ============================================================
+# AAG specific variables
+# Note: AAG does not use OPatch (no Oracle Home)
+# ============================================================
+aag_install_dir: /app/Axway-7.7.0
+aag_scripts_dir: /app/scripts
+
+# AAG patch archive (single patch per release)
+aag_patch_archive: APIGateway_7.7.20240228_Core_linux-x86-64_BN01.tar.gz
+
+# ============================================================
 # OAM specific variables
 # ============================================================
 oam_oracle_home: "{{ oracle_home_oam }}"

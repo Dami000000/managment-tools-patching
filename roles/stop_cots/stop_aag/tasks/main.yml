@@ -1,2 +1,2 @@
 ---
-- include_tasks: stop_aag.yml
+- import_tasks: stop_aag.yml
