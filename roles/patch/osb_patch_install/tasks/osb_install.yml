@@ -1,30 +1,28 @@
 ---
-- name: Upload patch patch_archive
+- name: Upload patch {{ item.patch_archive }}
   copy:
-    src: "/app/binaries/OSB/{{ item.patch_archive }}"
+    src: "{{ patches_dir_osb }}/{{ item.patch_archive }}"
     dest: "{{ binaries_dir }}/{{ item.patch_archive }}"
-  with_items: "{{ patches_to_apply }}"
+  with_items: "{{ osb_patches_to_apply }}"
 
-- name: Unzip Patch
+- name: Unzip Patch {{ item.patch_archive }}
   unarchive:
     src: "{{ binaries_dir }}/{{ item.patch_archive }}"
     dest: "{{ binaries_dir }}"
     remote_src: yes
     list_files: true
-  with_items: "{{ patches_to_apply }}"
+  with_items: "{{ osb_patches_to_apply }}"
 
-- name: "Apply patch"
+- name: Apply patch {{ item.patch_id }}
   shell:
-    cmd: "{{ opatch_home }}/opatch apply -silent"
+    cmd: "{{ opatch_home_osb }}/opatch apply -silent"
     chdir: "{{ binaries_dir }}/{{ item.patch_id }}/"
   register: opatch_apply_out
-  with_items: "{{ patches_id }}"
-  
+  with_items: "{{ osb_patches_id }}"
+
 - debug:
     var: opatch_apply_out.stdout_lines
 
-
-  
 # - name: Delete content & directory
 #   file:
 #     state: absent

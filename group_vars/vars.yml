@@ -29,7 +29,7 @@ oracle_home_oud: /app/fmwOUD12214
 binaries_dir: /app/binaries
 
 # ============================================================
-# Patches source directory on ANSIBLE host (where scripts run)
+# Patches source directory on ANSIBLE HOST (where scripts run)
 # Structure:
 #   /app/patches/
 #     ├── JAVA/
@@ -223,6 +223,7 @@ osb_wls_password: "CHANGE_ME_USE_VAULT"
 
 # OSB patch archives
 osb_bundle_archive: p34980707_122140_Generic.zip
+osb_spbat_patch_id: SOA_SPB_12.2.1.4.240112
 
 osb_patches_to_apply:
   - patch_archive: p34549208_122140_Generic.zip

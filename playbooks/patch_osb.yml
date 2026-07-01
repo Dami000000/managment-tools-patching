@@ -1,0 +1,58 @@
+---
+# ============================================================
+# OSB Patch Playbook
+# ============================================================
+# Usage:
+#   Patch all OSB hosts (default):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_osb.yml
+#
+#   Patch specific location:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_osb.yml -e "target=osb_ap1"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_osb.yml -e "target=osb_ap2"
+#
+#   Patch specific server:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_osb.yml -e "target=osb1.ap1.dev.ccn2.taxud"
+#
+#   Patch on FAT environment:
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_osb.yml -e "target=osb_ap1"
+#
+#   Override serial (default: 1 host at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_osb.yml -e "serial=1"
+#
+# Default: runs on ALL OSB hosts, 1 host at a time
+# ============================================================
+
+- name: OSB Patching
+  hosts: "{{ target | default('osb') }}"
+  serial: "{{ serial | default(1) }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+
+  tasks:
+    - name: Stop OSB services
+      include_tasks: ../roles/stop_cots/stop_osb/tasks/stop_osb.yml
+      tags: [stop, cots]
+
+    - name: Backup OSB
+      include_tasks: ../roles/backup/backup_osb/tasks/backup_osb.yml
+      tags: [backup]
+
+    - name: Install/Update JDK
+      include_tasks: ../roles/jdk/tasks/jdk_install.yml
+      tags: [jdk]
+
+    - name: Install/Update OPatch for OSB
+      include_tasks: ../roles/opatch_install/tasks/opatch_install_osb.yml
+      tags: [opatch]
+
+    - name: Apply SPBAT OSB Bundle Patch
+      include_tasks: ../roles/spbat/tasks/spbat_osb_install.yml
+      tags: [spbat]
+
+    - name: Apply OSB patches
+      include_tasks: ../roles/patch/osb_patch_install/tasks/osb_install.yml
+      tags: [patch]
+
+    - name: Start OSB services
+      include_tasks: ../roles/start_cots/start_osb/tasks/start_osb.yml
+      tags: [start, cots]
