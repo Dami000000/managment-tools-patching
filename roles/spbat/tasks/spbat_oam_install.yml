@@ -1,0 +1,31 @@
+---
+- name: Upload SPBAT OAM Bundle Patch {{ OAMbundle_archive }}
+  copy:
+    src: "{{ patches_dir_oam }}/{{ OAMbundle_archive }}"
+    dest: "{{ binaries_dir }}/{{ OAMbundle_archive }}"
+
+- name: Unzip Patch OAMbundle
+  shell:
+    cmd: "unzip -o {{ OAMbundle_archive }}"
+    chdir: "{{ binaries_dir }}"
+
+- name: Execute pre stop phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oam -phase prestop -mw_home {{ oracle_home }} -spb_download_dir {{ binaries_dir }}/{{ spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+
+- name: Execute downtime phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oam -phase downtime -mw_home {{ oracle_home }} -spb_download_dir {{ binaries_dir }}/{{ spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
+
+- name: Execute post start phase spbat script
+  shell:
+    cmd: "{{ binaries_dir }}/{{ spbat_patch_id }}/tools/spbat/generic/SPBAT/spbat.sh -type oam -phase poststart -mw_home {{ oracle_home }} -spb_download_dir {{ binaries_dir }}/{{ spbat_patch_id }}"
+  register: spbat_out
+- debug:
+    var: spbat_out.stdout_lines
