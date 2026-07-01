@@ -14,6 +14,15 @@ opatch_home_oig: /app/fmwOIG12214/OPatch
 opatch_home_osb: /app/fmwOSB12214/OPatch
 
 # ============================================================
+# Oracle Home directories (per product)
+# ============================================================
+oracle_home_oam: /app/fmwOAM12214
+oracle_home_ohs: /app/fmwOHS12214
+oracle_home_oig: /app/fmwOIG12214
+oracle_home_osb: /app/fmwOSB12214
+oracle_home_oud: /app/fmwOUD12214
+
+# ============================================================
 # Binaries directory on TARGET servers
 # Patch archives are copied here and extracted before install
 # ============================================================
@@ -42,11 +51,53 @@ patches_dir_oud:  "{{ patches_dir }}/OUD"
 patches_dir_osb:  "{{ patches_dir }}/OSB"
 
 # ============================================================
+# JDK variables
+# ============================================================
+jdk_archive: jdk-8u441-linux-x64.tar.gz
+old_jdk: jdk1.8.0_401
+new_jdk: jdk1.8.0_441
+
+# ============================================================
+# OPatch archive
+# ============================================================
+opatch_archive: p28186730_1394218_Generic.zip
+
+# ============================================================
 # OAM specific variables
 # ============================================================
+oam_oracle_home: "{{ oracle_home_oam }}"
+
 oam_admin_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud:7001"
+oam_admin_server_url: "t3://oam-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
+oam_admin_server_port: 7001
+
 oam_managed_server_domain: /app/config/mserver/domains/IAMAccessDomain
 oam_admin_server_domain: /mnt/nfs/config/aserver/domains/IAMAccessDomain
+
+# OAM managed servers per node (order: wls_oam, wls_ama)
+oam_managed_servers_node1:
+  - managed_server_node1: wls_oam1
+  - managed_server_node1: wls_ama1
+
+oam_managed_servers_node2:
+  - managed_server_node2: wls_oam2
+  - managed_server_node2: wls_ama2
+
+# OAM WebLogic credentials (use ansible-vault to encrypt oam_wls_password!)
+oam_wls_user: weblogic
+oam_wls_password: "CHANGE_ME_USE_VAULT"
+
+# OAM patch archives
+oam_bundle_archive: p37478538_122140_Linux-x86-64.zip
+oam_spbat_patch_id: IDM_SPB_12.2.1.4.250115
+
+oam_patches_to_apply:
+  - patch_archive: p36946553_122140_Generic.zip
+  - patch_archive: p36739303_12214221222_Generic.zip
+
+oam_patches_id:
+  - patch_id: 36946553
+  - patch_id: 36739303
 
 # ============================================================
 # SSH / Ansible connection

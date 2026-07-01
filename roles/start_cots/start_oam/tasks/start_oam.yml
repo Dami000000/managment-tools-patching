@@ -13,7 +13,7 @@
   changed_when: False
   failed_when: False
 
-- name: Check OAM Managed server process
+- name: Check OAM AMA Managed server process
   shell: "pgrep -f '/IAMAccessDomain/config/fmwconfig/servers/wls_ama'"
   register: ama_process_check
   ignore_errors: yes
@@ -24,7 +24,7 @@
   shell: "pgrep -f '/mnt/nfs/config/aserver/domains/IAMAccessDomain/bin/startWebLogic.sh'"
   register: admin_process_check
   ignore_errors: yes
-  when: 
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
   changed_when: False
   failed_when: False
@@ -32,17 +32,18 @@
 - name: Start OAM NodeManager
   shell:
     cmd: "nohup ./startNodeManager.sh &"
-    chdir: "{{ managed_server_domain }}/bin"
+    chdir: "{{ oam_managed_server_domain }}/bin"
   register: startNodeManager_out
   when: nodemanager_process_check.rc != 0
-- debug: 
+
+- debug:
     var: startNodeManager_out.stdout_lines
-  when: nodemanager_process_check.rc != 0 
+  when: nodemanager_process_check.rc != 0
 
 - name: Start OAM Admin Server
   shell:
-    cmd: 'nohup {{ admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
-  when: 
+    cmd: 'nohup {{ oam_admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ oam_admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - admin_process_check.rc != 0
 
@@ -52,55 +53,51 @@
     port: 7001
     delay: 10
     timeout: 300
-  when: 
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - admin_process_check.rc != 0
-  
 
-
-- name: Start OAM Managed Servers OAM node 1
+- name: Start OAM Managed Server - OAM node1
   shell:
-    cmd: "nohup ./startManagedWebLogic.sh  {{ managed_servers_node1[0].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}} &"
-    chdir: "{{ managed_server_domain }}/bin"
-  when: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ oam_managed_servers_node1[0].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} &"
+    chdir: "{{ oam_managed_server_domain }}/bin"
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc != 0
 
-
-- name: Wait for OAM {{ managed_server_node1 }} to Start
+- name: Wait for OAM node1 to Start
   wait_for:
     host: oam1.{{ ap }}.{{ env }}.ccn2.taxud
     port: 14100
     delay: 10
     timeout: 300
-  when: 
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc != 0
-  
-- name: Start OAM Managed Servers - OAM node 2
+
+- name: Start OAM Managed Server - OAM node2
   shell:
-    cmd: "nohup ./startManagedWebLogic.sh  {{ managed_servers_node2[0].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}} &"
-    chdir: "{{ managed_server_domain }}/bin"
-  when: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ oam_managed_servers_node2[0].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} &"
+    chdir: "{{ oam_managed_server_domain }}/bin"
+  when:
     - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc != 0
 
-- name: Wait for OAM {{ managed_server_node2 }} to Start
+- name: Wait for OAM node2 to Start
   wait_for:
     host: oam2.{{ ap }}.{{ env }}.ccn2.taxud
     port: 14100
     delay: 10
     timeout: 300
-  when: 
+  when:
     - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
     - managed_process_check.rc != 0
 
-####
-- name: Start OAM AMA1 Servers - AMA node 1
+- name: Start OAM AMA Server - AMA node1
   shell:
-    cmd: "nohup ./startManagedWebLogic.sh  {{ managed_servers_node1[1].managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}} &"
-    chdir: "{{ managed_server_domain }}/bin"
-  when: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ oam_managed_servers_node1[1].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} &"
+    chdir: "{{ oam_managed_server_domain }}/bin"
+  when:
     - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - ama_process_check.rc != 0
 
@@ -110,16 +107,15 @@
     port: 14150
     delay: 10
     timeout: 300
-  when: 
-    - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
+  when:
+    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
     - ama_process_check.rc != 0
 
-
-- name: Start OAM AMA2 Servers - node 2
+- name: Start OAM AMA Server - AMA node2
   shell:
-    cmd: "nohup ./startManagedWebLogic.sh  {{ managed_servers_node2[1].managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}} &"
-    chdir: "{{ managed_server_domain }}/bin"
-  when: 
+    cmd: "nohup ./startManagedWebLogic.sh {{ oam_managed_servers_node2[1].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} &"
+    chdir: "{{ oam_managed_server_domain }}/bin"
+  when:
     - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
     - ama_process_check.rc != 0
 
@@ -129,6 +125,6 @@
     port: 14150
     delay: 10
     timeout: 300
-  when: 
+  when:
     - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
     - ama_process_check.rc != 0
