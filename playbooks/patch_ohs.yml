@@ -1,0 +1,58 @@
+---
+# ============================================================
+# OHS Patch Playbook
+# ============================================================
+# Usage:
+#   Patch all OHS hosts (default):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_ohs.yml
+#
+#   Patch specific location:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_ohs.yml -e "target=ohs_ap1"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_ohs.yml -e "target=ohs_ap2"
+#
+#   Patch specific server:
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_ohs.yml -e "target=ohs1.ap1.dev.ccn2.taxud"
+#
+#   Patch on FAT environment:
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_ohs.yml -e "target=ohs_ap1"
+#
+#   Override serial (default: 1 host at a time):
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_ohs.yml -e "serial=2"
+#
+# Default: runs on ALL OHS hosts, 1 host at a time
+# ============================================================
+
+- name: OHS Patching
+  hosts: "{{ target | default('ohs') }}"
+  serial: "{{ serial | default(1) }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+
+  tasks:
+    - name: Stop OHS services
+      include_tasks: ../roles/stop_cots/stop_ohs/tasks/stop_ohs.yml
+      tags: [stop, cots]
+
+    - name: Backup OHS
+      include_tasks: ../roles/backup/backup_ohs/tasks/backup_ohs.yml
+      tags: [backup]
+
+    - name: Install/Update JDK
+      include_tasks: ../roles/jdk/tasks/jdk_install.yml
+      tags: [jdk]
+
+    - name: Install/Update OPatch for OHS
+      include_tasks: ../roles/opatch_install/tasks/opatch_install_ohs.yml
+      tags: [opatch]
+
+    - name: Install DB Client
+      include_tasks: ../roles/db_client_install/tasks/db_client_install.yml
+      tags: [db_client]
+
+    - name: Apply OHS patches
+      include_tasks: ../roles/patch/ohs_patch_install/tasks/ohs_install.yml
+      tags: [patch]
+
+    - name: Start OHS services
+      include_tasks: ../roles/start_cots/start_ohs/tasks/start_ohs.yml
+      tags: [start, cots]

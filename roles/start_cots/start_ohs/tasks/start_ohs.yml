@@ -1,80 +1,35 @@
 ---
-
 - name: Check OHS NodeManager Server process
   shell: "pgrep -f 'startNodeManager'"
   register: ohsNM_process_check
-  ignore_errors: True
+  ignore_errors: yes
   changed_when: False
   failed_when: False
 
 - name: Check OHS Instance Server process
   shell: "pgrep -f '/ohs/bin/httpd'"
   register: ohs_check
-  ignore_errors: True
+  ignore_errors: yes
   changed_when: False
   failed_when: False
 
 - name: Start OHS NodeManager
-  shell: 
-    cmd: "nohup ./startNodeManager.sh &" 
-    chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
+  shell:
+    cmd: "nohup ./startNodeManager.sh &"
+    chdir: "{{ ohs_domain }}/bin"
   register: startNM
   when:
     - ohsNM_process_check.rc != 0
-# - debug:
-#     var: startNM.stdout_lines
-  
+- debug:
+    var: startNM.stdout_lines
 
 - name: Start OHS
   shell: 'ohs start'
   environment:
-    JAVA_HOME: /app/jdk
+    JAVA_HOME: "{{ java_home }}"
     PATH: /usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin:/usr/sbin:/app/jdk/bin:/app/scripts
   register: startohs_out
   when:
     - ohs_check.rc != 0
 - debug:
     var: startohs_out.stdout_lines
-
-# - name: Start OHS Instance - node 1
-#   shell: 
-#     cmd: "./startComponent.sh ohs1"
-#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
-#   register: startohs1_out
-#   ignore_errors: yes
-# - debug:
-#     var: startohs1_out.stdout_lines
-
-# - name: Start OHS Instance - node 2
-#   shell: 
-#     cmd: "./startComponent.sh ohs2"
-#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
-#   when: "'Cannot find System Component' in startohs1_out.stdout_lines | join(' ')"
-#   register: startohs2_out
-# - debug:
-#     var: startohs1_out.stdout_lines
-
-
-
-
-# - name: Start OHS Instance - node 1
-#   shell: 
-#     cmd: "./startComponent.sh ohs1"
-#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
-#   when: inventory_hostname == groups['ohs_dev_ap2'][0]
-#   register: startohs_out
-# - debug:
-#     var: startohs_out.stdout_lines
-#   when: inventory_hostname == groups['ohs_dev_ap2'][0]
-
-# - name: Start OHS Instance - node 2
-#   shell: 
-#     cmd: "./startComponent.sh ohs2"
-#     chdir: "/app/config/mserver/domains/IAMGovernanceDomain/bin"
-#   when: inventory_hostname == groups['ohs_dev_ap2'][1]
-#   register: startohs_out
-# - debug:
-#     var: startohs_out.stdout_lines
-#   when: inventory_hostname == groups['ohs_dev_ap2'][1]
-
-

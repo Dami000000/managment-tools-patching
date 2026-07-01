@@ -1,9 +1,9 @@
 ---
-- name: Upload patch patch_archive
+- name: Upload patch {{ item.patch_archive }}
   copy:
-    src: "/app/binaries/OHS/{{ item.patch_archive }}"
+    src: "{{ patches_dir_ohs }}/{{ item.patch_archive }}"
     dest: "{{ binaries_dir }}/{{ item.patch_archive }}"
-  with_items: "{{ patches_to_apply }}"
+  with_items: "{{ ohs_patches_to_apply }}"
 
 - name: Unzip Patch
   unarchive:
@@ -11,22 +11,15 @@
     dest: "{{ binaries_dir }}"
     remote_src: yes
     list_files: true
-  with_items: "{{ patches_to_apply }}"
+  with_items: "{{ ohs_patches_to_apply }}"
   register: zip_content
 
-- name: "Apply patch"
+- name: Apply patch
   shell:
     cmd: "{{ opatch_home_ohs }}/opatch apply -silent"
     chdir: "{{ binaries_dir }}/{{ item.patch_id }}/"
   register: opatch_apply_out
-  with_items: "{{ patches_id }}"
-  
+  with_items: "{{ ohs_patches_id }}"
+
 - debug:
     var: opatch_apply_out.stdout_lines
-
-
-  
-# - name: Delete content & directory
-#   file:
-#     state: absent
-#     path: "{{ binaries_dir }}/{{ patch_id }}"

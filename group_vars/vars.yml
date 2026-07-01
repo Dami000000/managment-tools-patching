@@ -56,6 +56,7 @@ patches_dir_osb:  "{{ patches_dir }}/OSB"
 jdk_archive: jdk-8u441-linux-x64.tar.gz
 old_jdk: jdk1.8.0_401
 new_jdk: jdk1.8.0_441
+java_home: /app/jdk
 
 # ============================================================
 # OPatch archive
@@ -135,6 +136,37 @@ oig_patches_to_apply:
 
 oig_patches_id:
   - patch_id: 36946553
+
+# ============================================================
+# OHS specific variables
+# ============================================================
+ohs_domain: /app/config/mserver/domains/IAMGovernanceDomain
+ohs_config_dir: /app/config
+
+# OHS patch archives
+ohs_patches_to_apply:
+  - patch_archive: p37443574_122140_Linux-x86-64.zip
+  - patch_archive: p37297691_122140_Linux-x86-64.zip
+  - patch_archive: p37202254_122140_Generic.zip
+  - patch_archive: p37453807_122140_Generic.zip
+  - patch_archive: p37258699_122140_Generic.zip
+  - patch_archive: p37374672_122140_Generic.zip
+  - patch_archive: p37078094_122140_Linux-x86-64.zip
+  - patch_archive: p37056593_122140_Generic.zip
+  - patch_archive: p37202255_122140_Generic.zip
+  - patch_archive: p36789759_122140_Generic.zip
+
+ohs_patches_id:
+  - patch_id: 37443574
+  - patch_id: 37297691
+  - patch_id: 37202254
+  - patch_id: 37453807
+  - patch_id: 37258699
+  - patch_id: 37374672
+  - patch_id: 37078094
+  - patch_id: 37056593
+  - patch_id: 37202255
+  - patch_id: 36789759
 
 # ============================================================
 # OSB specific variables
