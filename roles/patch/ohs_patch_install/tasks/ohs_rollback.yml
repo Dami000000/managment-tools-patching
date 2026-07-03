@@ -1,0 +1,44 @@
+---
+# ============================================================
+# OHS Patch Rollback
+# Rolls back patches listed in ohs_patches_rollback (vars.yml)
+# If ohs_patches_rollback is empty ([]) this task is skipped
+# ============================================================
+
+- name: Check if there are OHS patches to rollback
+  debug:
+    msg: "Patches to rollback: {{ ohs_patches_rollback }}"
+  when: ohs_patches_rollback | length > 0
+
+- name: Skip rollback - no patches defined in ohs_patches_rollback
+  debug:
+    msg: "No patches to rollback for OHS. Skipping."
+  when: ohs_patches_rollback | length == 0
+
+- name: Rollback OHS patch {{ item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_ohs }}/opatch rollback -id {{ item.patch_id }} -silent -oh {{ oracle_home_ohs }}"
+  register: opatch_rollback_out
+  with_items: "{{ ohs_patches_rollback }}"
+  when: ohs_patches_rollback | length > 0
+  ignore_errors: no
+
+- name: Display rollback result
+  debug:
+    var: opatch_rollback_out
+  when: ohs_patches_rollback | length > 0
+
+- name: Verify rolled back patches are no longer installed
+  shell:
+    cmd: "{{ opatch_home_ohs }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
+  register: patch_check
+  with_items: "{{ ohs_patches_rollback }}"
+  when: ohs_patches_rollback | length > 0
+
+- name: Confirm patch {{ item.item.patch_id }} successfully removed
+  debug:
+    msg: "Patch {{ item.item.patch_id }} successfully rolled back."
+  with_items: "{{ patch_check.results }}"
+  when:
+    - ohs_patches_rollback | length > 0
+    - item.stdout == "0"

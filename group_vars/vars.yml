@@ -111,6 +111,9 @@ oam_patches_id:
   - patch_id: 36946553
   - patch_id: 36739303
 
+# OAM patches to rollback before applying new patches (leave empty [] if none)
+oam_patches_rollback: []
+
 # ============================================================
 # OIG specific variables
 # oracle_home_oig = /app/fmwOIM12214 (OIG uses OIM binaries path)
@@ -146,6 +149,9 @@ oig_patches_to_apply:
 oig_patches_id:
   - patch_id: 36946553
 
+# OIG patches to rollback before applying new patches (leave empty [] if none)
+oig_patches_rollback: []
+
 # ============================================================
 # OHS specific variables
 # ============================================================
@@ -177,6 +183,11 @@ ohs_patches_id:
   - patch_id: 37202255
   - patch_id: 36789759
 
+# OHS patches to rollback before applying new patches (leave empty [] if none)
+ohs_patches_rollback:
+  - patch_id: 38759265
+  - patch_id: 38792523
+
 # ============================================================
 # OUD specific variables
 # ============================================================
@@ -202,6 +213,9 @@ oud_patches_id:
   - patch_id: 34883826
   - patch_id: 34682234
   - patch_id: 34964109
+
+# OUD patches to rollback before applying new patches (leave empty [] if none)
+oud_patches_rollback: []
 
 # ============================================================
 # OSB specific variables
@@ -233,6 +247,9 @@ osb_patches_id:
   - patch_id: 34549208
   - patch_id: 34839859
   - patch_id: 33950717
+
+# OSB patches to rollback before applying new patches (leave empty [] if none)
+osb_patches_rollback: []
 
 # ============================================================
 # SSH / Ansible connection

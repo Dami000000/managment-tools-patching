@@ -1,4 +1,14 @@
 ---
+# ============================================================
+# OHS Patch Install
+# Before applying patches, rollback is performed if
+# ohs_patches_rollback list is defined and not empty in vars.yml
+# ============================================================
+
+- name: Rollback conflicting OHS patches before install
+  include_tasks: ohs_rollback.yml
+  tags: [rollback]
+
 - name: Upload patch {{ item.patch_archive }}
   copy:
     src: "{{ patches_dir_ohs }}/{{ item.patch_archive }}"

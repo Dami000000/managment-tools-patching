@@ -1,0 +1,44 @@
+---
+# ============================================================
+# OIG Patch Rollback
+# Rolls back patches listed in oig_patches_rollback (vars.yml)
+# If oig_patches_rollback is empty ([]) this task is skipped
+# ============================================================
+
+- name: Check if there are OIG patches to rollback
+  debug:
+    msg: "Patches to rollback: {{ oig_patches_rollback }}"
+  when: oig_patches_rollback | length > 0
+
+- name: Skip rollback - no patches defined in oig_patches_rollback
+  debug:
+    msg: "No patches to rollback for OIG. Skipping."
+  when: oig_patches_rollback | length == 0
+
+- name: Rollback OIG patch {{ item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_oig }}/opatch rollback -id {{ item.patch_id }} -silent -oh {{ oracle_home_oig }}"
+  register: opatch_rollback_out
+  with_items: "{{ oig_patches_rollback }}"
+  when: oig_patches_rollback | length > 0
+  ignore_errors: no
+
+- name: Display rollback result
+  debug:
+    var: opatch_rollback_out
+  when: oig_patches_rollback | length > 0
+
+- name: Verify rolled back patches are no longer installed
+  shell:
+    cmd: "{{ opatch_home_oig }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
+  register: patch_check
+  with_items: "{{ oig_patches_rollback }}"
+  when: oig_patches_rollback | length > 0
+
+- name: Confirm patch {{ item.item.patch_id }} successfully removed
+  debug:
+    msg: "Patch {{ item.item.patch_id }} successfully rolled back."
+  with_items: "{{ patch_check.results }}"
+  when:
+    - oig_patches_rollback | length > 0
+    - item.stdout == "0"
