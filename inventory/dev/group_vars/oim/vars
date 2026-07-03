@@ -1,19 +1,2 @@
----
-opatch_home: /app/fmwOIM12214/OPatch
-admin_server_url:  't3://oim-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud'
-admin_server_port: 7101
-managed_server_port: 14000
-soa_port: 8001
-managed_server_domain: "/app/config/mserver/domains/IAMGovernanceDomain12c"
-admin_server_domain: "/mnt/nfs/config/aserver/domains/IAMGovernanceDomain12c"
-# managed_server_node1: wls_oim1
-#managed_server_node1: wls_oim2
-managed_servers_node1:
-    - managed_server_node1: wls_oim1
-    - managed_server_node1: wls_soa1
-managed_servers_node2:
-    - managed_server_node2: wls_oim2
-    - managed_server_node2: wls_soa2
-
-ap: mh
-env: dev
+# Zmienne OIM/OIG przeniesione do group_vars/vars.yml
+# Ten plik jest pusty - nie usuwaj katalogu

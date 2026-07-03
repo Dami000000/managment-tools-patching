@@ -21,44 +21,44 @@
   failed_when: False
 
 - name: Shutdown OSB Managed Server - node1
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_server_node1 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ osb_managed_server_node1 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    chdir: "{{ osb_domain }}/bin"
   register: stopManagedServer_out
-  when: 
-    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+  when:
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
     - OSB_check.rc == 0
-- debug: 
-     var: stopManagedServer_out.stdout_lines
+- debug:
+    var: stopManagedServer_out.stdout_lines
 
 - name: Shutdown OSB Managed Server - node2
-  shell: 
-    cmd: "./stopManagedWebLogic.sh {{ managed_server_node2 }} {{ admin_server_url }}:{{ admin_server_port}}"
-    chdir: "{{ managed_server_domain }}/bin"
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ osb_managed_server_node2 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    chdir: "{{ osb_domain }}/bin"
   register: stopManagedServer2_out
-  when: 
+  when:
     - inventory_hostname == 'osb2.{{ ap }}.{{ env }}.ccn2.taxud'
     - OSB_check.rc == 0
-- debug: 
+- debug:
     var: stopManagedServer2_out.stdout_lines
 
-- name: Shutdown OSB Admin Servers 
+- name: Shutdown OSB Admin Servers
   shell:
     cmd: "./stopWebLogic.sh"
-    chdir: "{{ admin_server_domain }}/bin"
+    chdir: "{{ osb_domain }}/bin"
   register: stopAdminServer_out
-  when: 
-    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud' 
+  when:
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
     - OSBAdmin_check.rc == 0
-- debug: 
+- debug:
     var: stopAdminServer_out.stdout_lines
 
 - name: Shutdown OSB NodeManager
   shell:
     cmd: "./stopNodeManager.sh"
-    chdir: "{{ managed_server_domain }}/bin"
+    chdir: "{{ osb_domain }}/bin"
   register: stopNodeManager_out
   when:
     - osbNM_process_check.rc == 0
-- debug: 
+- debug:
     var: stopNodeManager_out.stdout_lines

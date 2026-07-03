@@ -1,8 +1,2 @@
----
-opatch_home: /app/fmwOSB12214/OPatch
-admin_server_url:  "t3://osb1.{{ ap }}.{{ env }}.ccn2.taxud"
-admin_server_port: 7001
-managed_server_domain: "/app/domains/OSB_dom"
-admin_server_domain: "/app/domains/OSB_dom"
-managed_server_node1: osb_server1
-managed_server_node2: osb_server2
+# Zmienne OSB przeniesione do group_vars/vars.yml
+# Ten plik jest pusty - nie usuwaj katalogu
