@@ -1,4 +1,10 @@
 ---
+# ============================================================
+# OUD Patch Install
+# Before applying patches, rollback is performed if
+# oud_patches_rollback list is defined and not empty in vars.yml
+# ============================================================
+
 - name: Upload patch {{ item.patch_archive }}
   copy:
     src: "{{ patches_dir_oud }}/{{ item.patch_archive }}"
@@ -13,6 +19,10 @@
     list_files: true
   with_items: "{{ oud_patches_to_apply }}"
   register: zip_content
+
+- name: Rollback conflicting OUD patches before install
+  include_tasks: oud_rollback.yml
+  tags: [rollback]
 
 - name: Apply patch
   shell:

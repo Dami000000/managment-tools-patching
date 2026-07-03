@@ -1,4 +1,10 @@
 ---
+# ============================================================
+# OIG Patch Install
+# Before applying patches, rollback is performed if
+# oig_patches_rollback list is defined and not empty in vars.yml
+# ============================================================
+
 - name: Upload patch {{ item.patch_archive }}
   copy:
     src: "{{ patches_dir_oig }}/{{ item.patch_archive }}"
@@ -13,6 +19,10 @@
     list_files: true
   with_items: "{{ oig_patches_to_apply }}"
   register: zip_content
+
+- name: Rollback conflicting OIG patches before install
+  include_tasks: oig_rollback.yml
+  tags: [rollback]
 
 - name: Apply patch
   shell:

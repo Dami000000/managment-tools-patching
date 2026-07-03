@@ -1,4 +1,10 @@
 ---
+# ============================================================
+# OAM Patch Install
+# Before applying patches, rollback is performed if
+# oam_patches_rollback list is defined and not empty in vars.yml
+# ============================================================
+
 - name: Upload patch {{ item.patch_archive }}
   copy:
     src: "{{ patches_dir_oam }}/{{ item.patch_archive }}"
@@ -14,7 +20,11 @@
   with_items: "{{ oam_patches_to_apply }}"
   register: zip_content
 
-- name: "Apply patch"
+- name: Rollback conflicting OAM patches before install
+  include_tasks: oam_rollback.yml
+  tags: [rollback]
+
+- name: Apply patch
   shell:
     cmd: "{{ opatch_home_oam }}/opatch apply -silent"
     chdir: "{{ binaries_dir }}/{{ item.patch_id }}/"
