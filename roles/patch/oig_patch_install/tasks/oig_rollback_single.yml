@@ -1,0 +1,22 @@
+---
+- name: Check if OIG patch {{ patch_item.patch_id }} is installed
+  shell:
+    cmd: "{{ opatch_home_oig }}/opatch lsinventory | grep -c '{{ patch_item.patch_id }}' || true"
+  register: oig_patch_check
+  changed_when: false
+
+- name: Rollback OIG patch {{ patch_item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_oig }}/opatch rollback -id {{ patch_item.patch_id }} -silent -oh {{ oracle_home_oig }}"
+  register: oig_rollback_result
+  when: oig_patch_check.stdout | int > 0
+
+- name: OIG patch {{ patch_item.patch_id }} not installed - skipping rollback
+  debug:
+    msg: "Patch {{ patch_item.patch_id }} not found in Oracle Home - skipping rollback."
+  when: oig_patch_check.stdout | int == 0
+
+- name: Display OIG rollback result for {{ patch_item.patch_id }}
+  debug:
+    var: oig_rollback_result.stdout_lines
+  when: oig_patch_check.stdout | int > 0

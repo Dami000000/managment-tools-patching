@@ -3,7 +3,7 @@
 # OIG Patch Rollback
 # Rolls back patches listed in oig_patches_rollback (vars.yml)
 # If oig_patches_rollback is empty ([]) this task is skipped
-# Checks lsinventory first - skips if patch not installed
+# Checks lsinventory per-patch sequentially to handle cascade subsets
 # ============================================================
 
 - name: Skip rollback - no patches defined in oig_patches_rollback
@@ -11,32 +11,9 @@
     msg: "No patches to rollback for OIG. Skipping."
   when: oig_patches_rollback | length == 0
 
-- name: Check if OIG patch {{ item.patch_id }} is installed
-  shell:
-    cmd: "{{ opatch_home_oig }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
-  register: oig_patch_installed
-  with_items: "{{ oig_patches_rollback }}"
-  when: oig_patches_rollback | length > 0
-  changed_when: false
-
-- name: Rollback OIG patch {{ item.item.patch_id }}
-  shell:
-    cmd: "{{ opatch_home_oig }}/opatch rollback -id {{ item.item.patch_id }} -silent -oh {{ oracle_home_oig }}"
-  register: opatch_rollback_out
-  with_items: "{{ oig_patch_installed.results }}"
-  when:
-    - oig_patches_rollback | length > 0
-    - item.stdout | int > 0
-
-- name: Patch {{ item.item.patch_id }} not installed - skipping rollback
-  debug:
-    msg: "Patch {{ item.item.patch_id }} not found in Oracle Home - skipping rollback."
-  with_items: "{{ oig_patch_installed.results }}"
-  when:
-    - oig_patches_rollback | length > 0
-    - item.stdout | int == 0
-
-- name: Display rollback result
-  debug:
-    var: opatch_rollback_out
+- name: Rollback OIG patches sequentially
+  include_tasks: oig_rollback_single.yml
+  loop: "{{ oig_patches_rollback }}"
+  loop_control:
+    loop_var: patch_item
   when: oig_patches_rollback | length > 0

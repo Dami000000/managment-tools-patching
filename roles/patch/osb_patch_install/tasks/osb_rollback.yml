@@ -3,7 +3,7 @@
 # OSB Patch Rollback
 # Rolls back patches listed in osb_patches_rollback (vars.yml)
 # If osb_patches_rollback is empty ([]) this task is skipped
-# Checks lsinventory first - skips if patch not installed
+# Checks lsinventory per-patch sequentially to handle cascade subsets
 # ============================================================
 
 - name: Skip rollback - no patches defined in osb_patches_rollback
@@ -11,32 +11,9 @@
     msg: "No patches to rollback for OSB. Skipping."
   when: osb_patches_rollback | length == 0
 
-- name: Check if OSB patch {{ item.patch_id }} is installed
-  shell:
-    cmd: "{{ opatch_home_osb }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
-  register: osb_patch_installed
-  with_items: "{{ osb_patches_rollback }}"
-  when: osb_patches_rollback | length > 0
-  changed_when: false
-
-- name: Rollback OSB patch {{ item.item.patch_id }}
-  shell:
-    cmd: "{{ opatch_home_osb }}/opatch rollback -id {{ item.item.patch_id }} -silent -oh {{ oracle_home_osb }}"
-  register: opatch_rollback_out
-  with_items: "{{ osb_patch_installed.results }}"
-  when:
-    - osb_patches_rollback | length > 0
-    - item.stdout | int > 0
-
-- name: Patch {{ item.item.patch_id }} not installed - skipping rollback
-  debug:
-    msg: "Patch {{ item.item.patch_id }} not found in Oracle Home - skipping rollback."
-  with_items: "{{ osb_patch_installed.results }}"
-  when:
-    - osb_patches_rollback | length > 0
-    - item.stdout | int == 0
-
-- name: Display rollback result
-  debug:
-    var: opatch_rollback_out
+- name: Rollback OSB patches sequentially
+  include_tasks: osb_rollback_single.yml
+  loop: "{{ osb_patches_rollback }}"
+  loop_control:
+    loop_var: patch_item
   when: osb_patches_rollback | length > 0

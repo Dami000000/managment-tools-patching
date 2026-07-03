@@ -3,7 +3,7 @@
 # OUD Patch Rollback
 # Rolls back patches listed in oud_patches_rollback (vars.yml)
 # If oud_patches_rollback is empty ([]) this task is skipped
-# Checks lsinventory first - skips if patch not installed
+# Checks lsinventory per-patch sequentially to handle cascade subsets
 # ============================================================
 
 - name: Skip rollback - no patches defined in oud_patches_rollback
@@ -11,32 +11,9 @@
     msg: "No patches to rollback for OUD. Skipping."
   when: oud_patches_rollback | length == 0
 
-- name: Check if OUD patch {{ item.patch_id }} is installed
-  shell:
-    cmd: "{{ opatch_home_oud }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
-  register: oud_patch_installed
-  with_items: "{{ oud_patches_rollback }}"
-  when: oud_patches_rollback | length > 0
-  changed_when: false
-
-- name: Rollback OUD patch {{ item.item.patch_id }}
-  shell:
-    cmd: "{{ opatch_home_oud }}/opatch rollback -id {{ item.item.patch_id }} -silent -oh {{ oracle_home_oud }}"
-  register: opatch_rollback_out
-  with_items: "{{ oud_patch_installed.results }}"
-  when:
-    - oud_patches_rollback | length > 0
-    - item.stdout | int > 0
-
-- name: Patch {{ item.item.patch_id }} not installed - skipping rollback
-  debug:
-    msg: "Patch {{ item.item.patch_id }} not found in Oracle Home - skipping rollback."
-  with_items: "{{ oud_patch_installed.results }}"
-  when:
-    - oud_patches_rollback | length > 0
-    - item.stdout | int == 0
-
-- name: Display rollback result
-  debug:
-    var: opatch_rollback_out
+- name: Rollback OUD patches sequentially
+  include_tasks: oud_rollback_single.yml
+  loop: "{{ oud_patches_rollback }}"
+  loop_control:
+    loop_var: patch_item
   when: oud_patches_rollback | length > 0

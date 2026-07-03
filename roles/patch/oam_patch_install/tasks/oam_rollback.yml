@@ -3,7 +3,7 @@
 # OAM Patch Rollback
 # Rolls back patches listed in oam_patches_rollback (vars.yml)
 # If oam_patches_rollback is empty ([]) this task is skipped
-# Checks lsinventory first - skips if patch not installed
+# Checks lsinventory per-patch sequentially to handle cascade subsets
 # ============================================================
 
 - name: Skip rollback - no patches defined in oam_patches_rollback
@@ -11,32 +11,9 @@
     msg: "No patches to rollback for OAM. Skipping."
   when: oam_patches_rollback | length == 0
 
-- name: Check if OAM patch {{ item.patch_id }} is installed
-  shell:
-    cmd: "{{ opatch_home_oam }}/opatch lsinventory | grep -c '{{ item.patch_id }}' || true"
-  register: oam_patch_installed
-  with_items: "{{ oam_patches_rollback }}"
-  when: oam_patches_rollback | length > 0
-  changed_when: false
-
-- name: Rollback OAM patch {{ item.item.patch_id }}
-  shell:
-    cmd: "{{ opatch_home_oam }}/opatch rollback -id {{ item.item.patch_id }} -silent -oh {{ oracle_home_oam }}"
-  register: opatch_rollback_out
-  with_items: "{{ oam_patch_installed.results }}"
-  when:
-    - oam_patches_rollback | length > 0
-    - item.stdout | int > 0
-
-- name: Patch {{ item.item.patch_id }} not installed - skipping rollback
-  debug:
-    msg: "Patch {{ item.item.patch_id }} not found in Oracle Home - skipping rollback."
-  with_items: "{{ oam_patch_installed.results }}"
-  when:
-    - oam_patches_rollback | length > 0
-    - item.stdout | int == 0
-
-- name: Display rollback result
-  debug:
-    var: opatch_rollback_out
+- name: Rollback OAM patches sequentially
+  include_tasks: oam_rollback_single.yml
+  loop: "{{ oam_patches_rollback }}"
+  loop_control:
+    loop_var: patch_item
   when: oam_patches_rollback | length > 0

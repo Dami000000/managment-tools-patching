@@ -1,0 +1,22 @@
+---
+- name: Check if OHS patch {{ patch_item.patch_id }} is installed
+  shell:
+    cmd: "{{ opatch_home_ohs }}/opatch lsinventory | grep -c '{{ patch_item.patch_id }}' || true"
+  register: ohs_patch_check
+  changed_when: false
+
+- name: Rollback OHS patch {{ patch_item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_ohs }}/opatch rollback -id {{ patch_item.patch_id }} -silent -oh {{ oracle_home_ohs }}"
+  register: ohs_rollback_result
+  when: ohs_patch_check.stdout | int > 0
+
+- name: OHS patch {{ patch_item.patch_id }} not installed - skipping rollback
+  debug:
+    msg: "Patch {{ patch_item.patch_id }} not found in Oracle Home - skipping rollback."
+  when: ohs_patch_check.stdout | int == 0
+
+- name: Display OHS rollback result for {{ patch_item.patch_id }}
+  debug:
+    var: ohs_rollback_result.stdout_lines
+  when: ohs_patch_check.stdout | int > 0

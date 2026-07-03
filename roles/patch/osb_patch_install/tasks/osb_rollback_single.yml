@@ -1,0 +1,22 @@
+---
+- name: Check if OSB patch {{ patch_item.patch_id }} is installed
+  shell:
+    cmd: "{{ opatch_home_osb }}/opatch lsinventory | grep -c '{{ patch_item.patch_id }}' || true"
+  register: osb_patch_check
+  changed_when: false
+
+- name: Rollback OSB patch {{ patch_item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_osb }}/opatch rollback -id {{ patch_item.patch_id }} -silent -oh {{ oracle_home_osb }}"
+  register: osb_rollback_result
+  when: osb_patch_check.stdout | int > 0
+
+- name: OSB patch {{ patch_item.patch_id }} not installed - skipping rollback
+  debug:
+    msg: "Patch {{ patch_item.patch_id }} not found in Oracle Home - skipping rollback."
+  when: osb_patch_check.stdout | int == 0
+
+- name: Display OSB rollback result for {{ patch_item.patch_id }}
+  debug:
+    var: osb_rollback_result.stdout_lines
+  when: osb_patch_check.stdout | int > 0

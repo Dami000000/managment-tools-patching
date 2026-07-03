@@ -1,0 +1,22 @@
+---
+- name: Check if OAM patch {{ patch_item.patch_id }} is installed
+  shell:
+    cmd: "{{ opatch_home_oam }}/opatch lsinventory | grep -c '{{ patch_item.patch_id }}' || true"
+  register: oam_patch_check
+  changed_when: false
+
+- name: Rollback OAM patch {{ patch_item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_oam }}/opatch rollback -id {{ patch_item.patch_id }} -silent -oh {{ oracle_home_oam }}"
+  register: oam_rollback_result
+  when: oam_patch_check.stdout | int > 0
+
+- name: OAM patch {{ patch_item.patch_id }} not installed - skipping rollback
+  debug:
+    msg: "Patch {{ patch_item.patch_id }} not found in Oracle Home - skipping rollback."
+  when: oam_patch_check.stdout | int == 0
+
+- name: Display OAM rollback result for {{ patch_item.patch_id }}
+  debug:
+    var: oam_rollback_result.stdout_lines
+  when: oam_patch_check.stdout | int > 0

@@ -1,0 +1,22 @@
+---
+- name: Check if OUD patch {{ patch_item.patch_id }} is installed
+  shell:
+    cmd: "{{ opatch_home_oud }}/opatch lsinventory | grep -c '{{ patch_item.patch_id }}' || true"
+  register: oud_patch_check
+  changed_when: false
+
+- name: Rollback OUD patch {{ patch_item.patch_id }}
+  shell:
+    cmd: "{{ opatch_home_oud }}/opatch rollback -id {{ patch_item.patch_id }} -silent -oh {{ oracle_home_oud }}"
+  register: oud_rollback_result
+  when: oud_patch_check.stdout | int > 0
+
+- name: OUD patch {{ patch_item.patch_id }} not installed - skipping rollback
+  debug:
+    msg: "Patch {{ patch_item.patch_id }} not found in Oracle Home - skipping rollback."
+  when: oud_patch_check.stdout | int == 0
+
+- name: Display OUD rollback result for {{ patch_item.patch_id }}
+  debug:
+    var: oud_rollback_result.stdout_lines
+  when: oud_patch_check.stdout | int > 0
