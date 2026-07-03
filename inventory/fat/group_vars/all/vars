@@ -1,13 +1,2 @@
 ---
-oracle_user: oracle
-oracle_group: oinstall
-
-
 env: fat
-
-#Patches variables
-binaries_dir: /app/binaries
-
-
-
-#ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
