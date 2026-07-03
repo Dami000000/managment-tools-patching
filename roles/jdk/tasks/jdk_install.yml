@@ -1,7 +1,21 @@
 ---
+- name: Check current Java version before upgrade
+  shell:
+    cmd: /app/jdk/bin/java -version 2>&1 | awk -F '"' '/version/ {print "jdk" $2}'
+  register: current_java_version
+  ignore_errors: yes
+
+- name: Display current Java version
+  debug:
+    msg: "Current Java version: {{ current_java_version.stdout }}"
+
+- name: Backup current JDK with version name
+  shell: "cp -rp /app/jdk /app/{{ current_java_version.stdout }}_backup"
+  when: current_java_version.stdout != ""
+
 - name: Upload Java {{ jdk_archive }}
   copy:
-    src: /app/binaries/Java/{{ jdk_archive }}
+    src: "{{ patches_dir_java }}/{{ jdk_archive }}"
     dest: "{{ binaries_dir }}/{{ jdk_archive }}"
 
 - name: Unzip Java
@@ -9,41 +23,25 @@
     src: "{{ binaries_dir }}/{{ jdk_archive }}"
     dest: "/app"
     remote_src: yes
-#    extra_opts: [--strip-components=0]
 
-- name: Move old jdk with other name
-  shell: "mv /app/jdk /app/{{ old_jdk }}"
+- name: Remove old /app/jdk symlink or directory
+  file:
+    path: /app/jdk
+    state: absent
 
-- name: Move new jdk with other name
+- name: Move new jdk to /app/jdk
   shell: "mv /app/{{ new_jdk }} /app/jdk"
 
-
-- name: Check Java Version
+- name: Check new Java version after upgrade
   shell:
-    cmd: /app/jdk/bin/java -version 2>&1| awk -F '"' ' /version/ {print "jdk" $2}'
-  register: java_version
-- debug:
-    var: java_version.stdout_lines[0]
+    cmd: /app/jdk/bin/java -version 2>&1 | awk -F '"' '/version/ {print "jdk" $2}'
+  register: java_version_after
 
-- name: Stop playbook when old version of Java
+- name: Display new Java version
+  debug:
+    msg: "New Java version: {{ java_version_after.stdout }}"
+
+- name: Stop playbook when new Java version is incorrect
   fail:
-    msg: "Old version Java detected. Playbook stopped"
-  when: java_version.stdout_lines[0] != "{{ new_jdk }}"
-
-
-
-# - name: Move old jdk with other name
-#   file:
-#     src: "/app/jdk/"
-#     dest: "/app/{{ old_jdk }}"
-#     state: directory
-#     remote_src: yes
-#     force: yes
-
-# - name: Move new jdk with other name
-#   file:
-#     src: "/app/{{ new_jdk }}"
-#     dest: "/app/jdk"
-#     state: directory
-#     remote_src: yes
-#     force: yes
+    msg: "Expected {{ new_jdk }} but found {{ java_version_after.stdout }}. Playbook stopped."
+  when: java_version_after.stdout != new_jdk
