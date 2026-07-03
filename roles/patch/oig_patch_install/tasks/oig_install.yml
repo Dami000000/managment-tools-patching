@@ -32,4 +32,4 @@
   with_items: "{{ oig_patches_id }}"
 
 - debug:
-    var: opatch_apply_out.stdout_lines
+    var: opatch_apply_out.results
