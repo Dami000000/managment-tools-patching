@@ -27,6 +27,8 @@
   serial: "{{ serial | default(1) }}"
   become: yes
   become_user: "{{ oracle_user }}"
+  vars_files:
+    - ../group_vars/vars.yml
 
   tasks:
     - name: Stop OHS services
