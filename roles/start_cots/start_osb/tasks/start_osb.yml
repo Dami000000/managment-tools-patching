@@ -35,37 +35,37 @@
     cmd: 'nohup {{ osb_domain }}/bin/startWebLogic.sh </dev/null >"{{ osb_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
   register: startAdmin
   when:
-    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
     - OSBAdmin_check.rc != 0
 
 - name: Wait for OSB Admin Server to Start
   wait_for:
-    host: osb1.{{ ap }}.{{ env }}.ccn2.taxud
+    host: "osb1.{{ ap }}.{{ env }}.ccn2.taxud"
     port: "{{ osb_admin_server_port }}"
     delay: 10
     timeout: 300
   when:
-    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
     - OSBAdmin_check.rc != 0
 
 - name: Start OSB Managed Server - node1
   shell:
-    cmd: "./startManagedWebLogic.sh {{ osb_managed_server_node1 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    cmd: 'nohup ./startManagedWebLogic.sh {{ osb_managed_server_node1 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }} </dev/null >"{{ osb_domain }}/servers/{{ osb_managed_server_node1 }}/logs/{{ osb_managed_server_node1 }}.out" 2>&1 &'
     chdir: "{{ osb_domain }}/bin"
   register: startManagedServer1_out
   when:
-    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
     - OSB_check.rc != 0
 - debug:
     var: startManagedServer1_out.stdout_lines
 
 - name: Start OSB Managed Server - node2
   shell:
-    cmd: "./startManagedWebLogic.sh {{ osb_managed_server_node2 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    cmd: 'nohup ./startManagedWebLogic.sh {{ osb_managed_server_node2 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }} </dev/null >"{{ osb_domain }}/servers/{{ osb_managed_server_node2 }}/logs/{{ osb_managed_server_node2 }}.out" 2>&1 &'
     chdir: "{{ osb_domain }}/bin"
   register: startManagedServer2_out
   when:
-    - inventory_hostname == 'osb2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'osb2.' + ap + '.' + env + '.ccn2.taxud'
     - OSB_check.rc != 0
 - debug:
     var: startManagedServer2_out.stdout_lines
