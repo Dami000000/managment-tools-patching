@@ -56,8 +56,24 @@
   when:
     - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
     - OSB_check.rc != 0
+
+- name: Waiting for OSB Managed Server node1 to start (checking every 15s)
+  wait_for:
+    host: "osb1.{{ ap }}.{{ env }}.ccn2.taxud"
+    port: "{{ osb_managed_server_port }}"
+    delay: 15
+    sleep: 15
+    timeout: 600
+    msg: "Still waiting for osb_server1 on port {{ osb_managed_server_port }}..."
+  when:
+    - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
+    - OSB_check.rc != 0
+
 - debug:
-    var: startManagedServer1_out.stdout_lines
+    msg: "OSB Managed Server node1 is UP on port {{ osb_managed_server_port }}"
+  when:
+    - inventory_hostname == 'osb1.' + ap + '.' + env + '.ccn2.taxud'
+    - OSB_check.rc != 0
 
 - name: Start OSB Managed Server - node2
   shell:
@@ -67,5 +83,21 @@
   when:
     - inventory_hostname == 'osb2.' + ap + '.' + env + '.ccn2.taxud'
     - OSB_check.rc != 0
+
+- name: Waiting for OSB Managed Server node2 to start (checking every 15s)
+  wait_for:
+    host: "osb2.{{ ap }}.{{ env }}.ccn2.taxud"
+    port: "{{ osb_managed_server_port }}"
+    delay: 15
+    sleep: 15
+    timeout: 600
+    msg: "Still waiting for osb_server2 on port {{ osb_managed_server_port }}..."
+  when:
+    - inventory_hostname == 'osb2.' + ap + '.' + env + '.ccn2.taxud'
+    - OSB_check.rc != 0
+
 - debug:
-    var: startManagedServer2_out.stdout_lines
+    msg: "OSB Managed Server node2 is UP on port {{ osb_managed_server_port }}"
+  when:
+    - inventory_hostname == 'osb2.' + ap + '.' + env + '.ccn2.taxud'
+    - OSB_check.rc != 0
