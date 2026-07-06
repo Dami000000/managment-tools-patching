@@ -47,3 +47,25 @@
   when:
     - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
     - OSBAdmin_check.rc != 0
+
+- name: Start OSB Managed Server - node1
+  shell:
+    cmd: "./startManagedWebLogic.sh {{ osb_managed_server_node1 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    chdir: "{{ osb_domain }}/bin"
+  register: startManagedServer1_out
+  when:
+    - inventory_hostname == 'osb1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - OSB_check.rc != 0
+- debug:
+    var: startManagedServer1_out.stdout_lines
+
+- name: Start OSB Managed Server - node2
+  shell:
+    cmd: "./startManagedWebLogic.sh {{ osb_managed_server_node2 }} {{ osb_admin_server_url }}:{{ osb_admin_server_port }}"
+    chdir: "{{ osb_domain }}/bin"
+  register: startManagedServer2_out
+  when:
+    - inventory_hostname == 'osb2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - OSB_check.rc != 0
+- debug:
+    var: startManagedServer2_out.stdout_lines
