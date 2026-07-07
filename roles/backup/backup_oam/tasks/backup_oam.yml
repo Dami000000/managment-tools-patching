@@ -5,21 +5,15 @@
     state: directory
 
 - name: Create backup of OAM Managed Server configuration files - /app/config
-  archive:
-    path: "{{ oam_managed_server_domain }}"
-    dest: /home/oracle/backup/OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz
-    format: gz
+  shell:
+    cmd: "tar czf /home/oracle/backup/OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oam_managed_server_domain }}"
 
 - name: Create backup of OAM Managed Server binaries - {{ oracle_home_oam }}
-  archive:
-    path: "{{ oracle_home_oam }}"
-    dest: /home/oracle/backup/fmwOAM12214_{{ ansible_date_time.date }}_full_backup.tar.gz
-    format: gz
+  shell:
+    cmd: "tar czf /home/oracle/backup/fmwOAM12214_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oracle_home_oam }}"
 
 - name: Create backup of OAM Admin Server configuration files - {{ oam_admin_server_domain }}
-  archive:
-    path: "{{ oam_admin_server_domain }}"
-    dest: /home/oracle/backup/Admin_OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz
-    format: gz
+  shell:
+    cmd: "tar czf /home/oracle/backup/Admin_OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oam_admin_server_domain }}"
   when:
     - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
