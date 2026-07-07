@@ -22,4 +22,4 @@
     dest: /home/oracle/backup/Admin_OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz
     format: gz
   when:
-    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
