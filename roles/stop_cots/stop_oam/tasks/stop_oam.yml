@@ -21,7 +21,7 @@
   failed_when: False
 
 - name: Check OAM Admin Server process
-  shell: "pgrep -f '/mnt/nfs/config/aserver/domains/IAMAccessDomain/bin/startWebLogic.sh'"
+  shell: "pgrep -f 'weblogic.Name=AdminServer'"
   register: admin_process_check
   ignore_errors: yes
   when:
