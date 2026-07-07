@@ -7,13 +7,18 @@
 - name: Create backup of OAM Managed Server configuration files - /app/config
   shell:
     cmd: "tar czf /home/oracle/backup/OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oam_managed_server_domain }}"
+    warn: false
 
 - name: Create backup of OAM Managed Server binaries - {{ oracle_home_oam }}
   shell:
     cmd: "tar czf /home/oracle/backup/fmwOAM12214_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oracle_home_oam }}"
+    warn: false
 
 - name: Create backup of OAM Admin Server configuration files - {{ oam_admin_server_domain }}
   shell:
     cmd: "tar czf /home/oracle/backup/Admin_OAM_config_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oam_admin_server_domain }}"
+    warn: false
+  async: 3600
+  poll: 30
   when:
     - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
