@@ -25,45 +25,53 @@
   register: admin_process_check
   ignore_errors: yes
   when:
-    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
   changed_when: False
   failed_when: False
 
 - name: Shutdown OAM Managed Server - OAM node1
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node1[0].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }}"
+    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node1[0].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} {{ oam_wls_user }} {{ oam_wls_password }}"
     chdir: "{{ oam_managed_server_domain }}/bin"
   register: stopManagedServer_out
   when:
-    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
     - managed_process_check.rc == 0
+- debug:
+    var: stopManagedServer_out.stdout_lines
 
 - name: Shutdown OAM Managed Server - OAM node2
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node2[0].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }}"
+    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node2[0].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} {{ oam_wls_user }} {{ oam_wls_password }}"
     chdir: "{{ oam_managed_server_domain }}/bin"
   register: stopManagedServer2_out
   when:
-    - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam2.' + ap + '.' + env + '.ccn2.taxud'
     - managed_process_check.rc == 0
+- debug:
+    var: stopManagedServer2_out.stdout_lines
 
 - name: Shutdown OAM AMA Server - AMA node1
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node1[1].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }}"
+    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node1[1].managed_server_node1 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} {{ oam_wls_user }} {{ oam_wls_password }}"
     chdir: "{{ oam_managed_server_domain }}/bin"
   register: stopAmaServer_out
   when:
-    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
     - ama_process_check.rc == 0
+- debug:
+    var: stopAmaServer_out.stdout_lines
 
 - name: Shutdown OAM AMA Server - AMA node2
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node2[1].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }}"
+    cmd: "./stopManagedWebLogic.sh {{ oam_managed_servers_node2[1].managed_server_node2 }} {{ oam_admin_server_url }}:{{ oam_admin_server_port }} {{ oam_wls_user }} {{ oam_wls_password }}"
     chdir: "{{ oam_managed_server_domain }}/bin"
   register: stopAmaServer2_out
   when:
-    - inventory_hostname == 'oam2.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam2.' + ap + '.' + env + '.ccn2.taxud'
     - ama_process_check.rc == 0
+- debug:
+    var: stopAmaServer2_out.stdout_lines
 
 - name: Shutdown OAM Admin Server
   shell:
@@ -71,8 +79,10 @@
     chdir: "{{ oam_admin_server_domain }}/bin"
   register: stopAdminServer_out
   when:
-    - inventory_hostname == 'oam1.{{ ap }}.{{ env }}.ccn2.taxud'
+    - inventory_hostname == 'oam1.' + ap + '.' + env + '.ccn2.taxud'
     - admin_process_check.rc == 0
+- debug:
+    var: stopAdminServer_out.stdout_lines
 
 - name: Shutdown OAM NodeManager
   shell:
@@ -81,3 +91,5 @@
   register: stopNodeManager_out
   when:
     - nodemanager_process_check.rc == 0
+- debug:
+    var: stopNodeManager_out.stdout_lines
