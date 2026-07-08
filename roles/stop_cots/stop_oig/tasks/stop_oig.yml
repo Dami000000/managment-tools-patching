@@ -1,0 +1,105 @@
+---
+- name: Check OIG Node Manager process
+  shell: "pgrep -f 'startNodeManager'"
+  register: nodemanager_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Managed server process - OIM
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_oim'"
+  register: managed_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Managed server process - SOA
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_soa'"
+  register: soa_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Admin Server process
+  shell: "pgrep -f '/app/config/mserver/domains/IAMGovernanceDomain/bin/startWebLogic.sh'"
+  register: admin_process_check
+  ignore_errors: yes
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+  changed_when: False
+  failed_when: False
+
+- name: Shutdown OIG Managed Server - OIG node1
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[0].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopManagedServer_out
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc == 0
+- debug:
+    var: stopManagedServer_out.stdout_lines
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+
+- name: Shutdown OIG Managed Server - OIG node2
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[0].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopManagedServer2_out
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc == 0
+- debug:
+    var: stopManagedServer2_out.stdout_lines
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+
+- name: Shutdown OIG SOA Server - SOA node1
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[1].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopSoaServer_out
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc == 0
+- debug:
+    var: stopSoaServer_out.stdout_lines
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+
+- name: Shutdown OIG SOA Server - SOA node2
+  shell:
+    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[1].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopSoaServer2_out
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc == 0
+- debug:
+    var: stopSoaServer2_out.stdout_lines
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+
+- name: Shutdown OIG Admin Server
+  shell:
+    cmd: "./stopWebLogic.sh"
+    chdir: "{{ oig_admin_server_domain }}/bin"
+  register: stopAdminServer_out
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - admin_process_check.rc == 0
+- debug:
+    var: stopAdminServer_out.stdout_lines
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+
+- name: Shutdown OIG NodeManager
+  shell:
+    cmd: "./stopNodeManager.sh"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: stopNodeManager_out
+  when:
+    - nodemanager_process_check.rc == 0
+- debug:
+    var: stopNodeManager_out.stdout_lines

@@ -31,7 +31,7 @@
 
   tasks:
     - name: Stop OIG services
-      include_tasks: ../roles/stop_cots/stop_oim/tasks/stop_oim.yml
+      include_tasks: ../roles/stop_cots/stop_oig/tasks/stop_oig.yml
       tags: [stop, cots]
 
     - name: Backup OIG
