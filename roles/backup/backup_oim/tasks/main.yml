@@ -1,4 +1,0 @@
----
-- include_tasks: ../roles/stop_cots/stop_oim/tasks/stop_oim.yml
-- include_tasks: backup_oim.yml
-- include_tasks: ../roles/start_cots/start_oim/tasks/start_oim.yml
