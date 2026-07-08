@@ -7,7 +7,7 @@
   failed_when: False
 
 - name: Check OIG Admin Server process
-  shell: "pgrep -f 'IAMGovernanceDomain12c'"
+  shell: "pgrep -f '{{ oig_admin_server_domain }}/bin/startWebLogic.sh'"
   register: admin_process_check
   ignore_errors: yes
   when:

@@ -6,22 +6,22 @@
   changed_when: False
   failed_when: False
 
-- name: Check OIG Managed server process - OIM
-  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_oim'"
+- name: Check OIG Managed server process - OIG
+  shell: "pgrep -f '{{ oig_managed_server_domain }}/config/fmwconfig/servers/wls_oim'"
   register: managed_process_check
   ignore_errors: yes
   changed_when: False
   failed_when: False
 
 - name: Check OIG Managed server process - SOA
-  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_soa'"
+  shell: "pgrep -f '{{ oig_managed_server_domain }}/config/fmwconfig/servers/wls_soa'"
   register: soa_process_check
   ignore_errors: yes
   changed_when: False
   failed_when: False
 
 - name: Check OIG Admin Server process
-  shell: "pgrep -f '/app/config/mserver/domains/IAMGovernanceDomain/bin/startWebLogic.sh'"
+  shell: "pgrep -f '{{ oig_admin_server_domain }}/bin/startWebLogic.sh'"
   register: admin_process_check
   ignore_errors: yes
   when:
