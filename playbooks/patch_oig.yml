@@ -7,19 +7,18 @@
 #     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml
 #
 #   Patch specific location:
-#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oig_ap1"
-#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oig_ap2"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oig_mh"
 #
 #   Patch specific server:
-#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oim1.ap1.dev.ccn2.taxud"
+#     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "target=oim1.mh.dev.ccn2.taxud"
 #
 #   Patch on FAT environment:
-#     ansible-playbook -i inventory/fat/hosts playbooks/patch_oig.yml -e "target=oig_ap1"
+#     ansible-playbook -i inventory/fat/hosts playbooks/patch_oig.yml -e "target=oig_mh"
 #
 #   Override serial (default: 2 hosts at a time):
 #     ansible-playbook -i inventory/dev/hosts playbooks/patch_oig.yml -e "serial=1"
 #
-# Default: runs on ALL OIG hosts (ap1 + ap2), 2 hosts at a time
+# Default: runs on ALL OIG hosts, 2 hosts at a time
 # ============================================================
 
 - name: OIG Patching

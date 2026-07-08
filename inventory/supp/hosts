@@ -63,10 +63,12 @@ oam_ap2
 oam_ap3
 oam_ap4
 
-### OIM ###
-[oim]
+### OIG ###
+[oig_mh]
 oim1.mh.supp.ccn2.taxud
 oim2.mh.supp.ccn2.taxud
+[oig:children]
+oig_mh
 
 ### OSB ###
 [osb_ap1]
