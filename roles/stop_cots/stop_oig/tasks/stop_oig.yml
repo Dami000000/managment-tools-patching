@@ -29,57 +29,51 @@
   changed_when: False
   failed_when: False
 
-- name: Shutdown OIG Managed Server - OIG node1
+- name: Copy stop_oig_managed_servers.py to target
+  template:
+    src: ../templates/stop_oig_managed_servers.py
+    dest: /tmp/stop_oig_managed_servers.py
+    owner: "{{ oracle_user }}"
+    mode: '0755'
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc == 0
+
+- name: Copy stop_soa_managed_servers.py to target
+  template:
+    src: ../templates/stop_soa_managed_servers.py
+    dest: /tmp/stop_soa_managed_servers.py
+    owner: "{{ oracle_user }}"
+    mode: '0755'
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc == 0
+
+- name: Shutdown OIG Managed Servers (force)
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[0].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
-    chdir: "{{ oig_managed_server_domain }}/bin"
+    cmd: "{{ oracle_home_oig }}/oracle_common/common/bin/wlst.sh /tmp/stop_oig_managed_servers.py"
   register: stopManagedServer_out
   when:
     - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
     - managed_process_check.rc == 0
+
 - debug:
     var: stopManagedServer_out.stdout_lines
   when:
     - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
 
-- name: Shutdown OIG Managed Server - OIG node2
+- name: Shutdown OIG SOA Servers (force)
   shell:
-    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[0].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
-    chdir: "{{ oig_managed_server_domain }}/bin"
-  register: stopManagedServer2_out
-  when:
-    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
-    - managed_process_check.rc == 0
-- debug:
-    var: stopManagedServer2_out.stdout_lines
-  when:
-    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
-
-- name: Shutdown OIG SOA Server - SOA node1
-  shell:
-    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node1[1].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
-    chdir: "{{ oig_managed_server_domain }}/bin"
+    cmd: "{{ oracle_home_oig }}/oracle_common/common/bin/wlst.sh /tmp/stop_soa_managed_servers.py"
   register: stopSoaServer_out
   when:
     - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
     - soa_process_check.rc == 0
+
 - debug:
     var: stopSoaServer_out.stdout_lines
   when:
     - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
-
-- name: Shutdown OIG SOA Server - SOA node2
-  shell:
-    cmd: "./stopManagedWebLogic.sh {{ oig_managed_servers_node2[1].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} {{ oig_wls_user }} {{ oig_wls_password }}"
-    chdir: "{{ oig_managed_server_domain }}/bin"
-  register: stopSoaServer2_out
-  when:
-    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
-    - soa_process_check.rc == 0
-- debug:
-    var: stopSoaServer2_out.stdout_lines
-  when:
-    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
 
 - name: Shutdown OIG Admin Server
   shell:
@@ -89,6 +83,7 @@
   when:
     - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
     - admin_process_check.rc == 0
+
 - debug:
     var: stopAdminServer_out.stdout_lines
   when:
@@ -101,5 +96,6 @@
   register: stopNodeManager_out
   when:
     - nodemanager_process_check.rc == 0
+
 - debug:
     var: stopNodeManager_out.stdout_lines
