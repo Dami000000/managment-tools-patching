@@ -1,0 +1,136 @@
+---
+- name: Check OIG Node Manager process
+  shell: "pgrep -f 'startNodeManager'"
+  register: nodemanager_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Managed server process - OIG
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_oim'"
+  register: managed_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Managed server process - SOA
+  shell: "pgrep -f '/IAMGovernanceDomain/config/fmwconfig/servers/wls_soa'"
+  register: soa_process_check
+  ignore_errors: yes
+  changed_when: False
+  failed_when: False
+
+- name: Check OIG Admin Server process
+  shell: "pgrep -f '/app/config/mserver/domains/IAMGovernanceDomain/bin/startWebLogic.sh'"
+  register: admin_process_check
+  ignore_errors: yes
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+  changed_when: False
+  failed_when: False
+
+- name: Start OIG NodeManager
+  shell:
+    cmd: "nohup ./startNodeManager.sh &"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: startNodeManager_out
+  when:
+    - nodemanager_process_check.rc != 0
+
+- debug:
+    var: startNodeManager_out.stdout_lines
+  when:
+    - nodemanager_process_check.rc != 0
+
+- name: Start OIG Admin Server
+  shell:
+    cmd: 'nohup {{ oig_admin_server_domain }}/bin/startWebLogic.sh </dev/null >"{{ oig_admin_server_domain }}/servers/AdminServer/logs/AdminServer.out" 2>&1 &'
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - admin_process_check.rc != 0
+
+- name: Wait for OIG Admin Server to Start
+  wait_for:
+    host: "oim-{{ ap }}-intvip.bck.{{ env }}.ccn2.taxud"
+    port: "{{ oig_admin_server_port }}"
+    delay: 10
+    timeout: 300
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - admin_process_check.rc != 0
+
+- name: Start OIG SOA Server - SOA node1
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh {{ oig_managed_servers_node1[1].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} &"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: startSoaServer_out
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc != 0
+
+- name: Wait for SOA node1 to Start
+  wait_for:
+    host: "oim1-{{ ap }}-soavip.bck.{{ env }}.ccn2.taxud"
+    port: "{{ oig_soa_port }}"
+    delay: 10
+    timeout: 300
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc != 0
+
+- name: Start OIG Managed Server - OIG node1
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh {{ oig_managed_servers_node1[0].managed_server_node1 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} &"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: startManagedServer_out
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc != 0
+
+- name: Wait for OIG node1 to Start
+  wait_for:
+    host: "oim1-{{ ap }}-oimvip.bck.{{ env }}.ccn2.taxud"
+    port: "{{ oig_managed_server_port }}"
+    delay: 10
+    timeout: 300
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc != 0
+
+- name: Start OIG SOA Server - SOA node2
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh {{ oig_managed_servers_node2[1].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} &"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: startSoaServer2_out
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc != 0
+
+- name: Wait for SOA node2 to Start
+  wait_for:
+    host: "oim2-{{ ap }}-soavip.bck.{{ env }}.ccn2.taxud"
+    port: "{{ oig_soa_port }}"
+    delay: 10
+    timeout: 300
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - soa_process_check.rc != 0
+
+- name: Start OIG Managed Server - OIG node2
+  shell:
+    cmd: "nohup ./startManagedWebLogic.sh {{ oig_managed_servers_node2[0].managed_server_node2 }} {{ oig_admin_server_url }}:{{ oig_admin_server_port }} &"
+    chdir: "{{ oig_managed_server_domain }}/bin"
+  register: startManagedServer2_out
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc != 0
+
+- name: Wait for OIG node2 to Start
+  wait_for:
+    host: "oim2-{{ ap }}-oimvip.bck.{{ env }}.ccn2.taxud"
+    port: "{{ oig_managed_server_port }}"
+    delay: 10
+    timeout: 300
+  when:
+    - inventory_hostname == 'oim2.' + ap + '.' + env + '.ccn2.taxud'
+    - managed_process_check.rc != 0

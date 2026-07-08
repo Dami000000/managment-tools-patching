@@ -35,7 +35,7 @@
       tags: [stop, cots]
 
     - name: Backup OIG
-      include_tasks: ../roles/backup/backup_oim/tasks/backup_oim.yml
+      include_tasks: ../roles/backup/backup_oig/tasks/backup_oig.yml
       tags: [backup]
 
     - name: Install/Update JDK
@@ -55,5 +55,5 @@
       tags: [patch]
 
     - name: Start OIG services
-      include_tasks: ../roles/start_cots/start_oim/tasks/start_oim.yml
+      include_tasks: ../roles/start_cots/start_oig/tasks/start_oig.yml
       tags: [start, cots]

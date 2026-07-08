@@ -1,0 +1,22 @@
+---
+- name: Create backup directory if not exist
+  file:
+    path: /home/oracle/backup
+    state: directory
+
+- name: Create backup of OIG Managed Server configuration files - /app/config
+  shell:
+    cmd: "tar czf /home/oracle/backup/OIG_config_{{ ansible_date_time.date }}_full_backup.tar.gz /app/config"
+    warn: false
+
+- name: Create backup of OIG Managed Server binaries - /app/fmwOIM12214
+  shell:
+    cmd: "tar czf /home/oracle/backup/fmwOIM12214_{{ ansible_date_time.date }}_full_backup.tar.gz /app/fmwOIM12214"
+    warn: false
+
+- name: Create backup of OIG Admin Server configuration files - {{ oig_admin_server_domain }}
+  shell:
+    cmd: "tar czf /home/oracle/backup/Admin_OIG_config_{{ ansible_date_time.date }}_full_backup.tar.gz {{ oig_admin_server_domain }}"
+    warn: false
+  when:
+    - inventory_hostname == 'oim1.' + ap + '.' + env + '.ccn2.taxud'
